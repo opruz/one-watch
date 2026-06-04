@@ -61,8 +61,13 @@ export default function App() {
   useEffect(() => {
     const stored = localStorage.getItem("ow-platforms");
     if (stored) {
-      setPlatforms(JSON.parse(stored));
-      setOnboarded(true);
+      try {
+        setPlatforms(JSON.parse(stored));
+        setOnboarded(true);
+      } catch {
+        localStorage.removeItem("ow-platforms");
+        setOnboarded(false);
+      }
     } else {
       setOnboarded(false);
     }
