@@ -230,6 +230,8 @@ input  { font-family: inherit; }
   flex-direction: column;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.08) transparent;
+  scroll-behavior: smooth;
+  scroll-padding-top: 1.5rem;
 }
 .main::-webkit-scrollbar { width: 4px; }
 .main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }

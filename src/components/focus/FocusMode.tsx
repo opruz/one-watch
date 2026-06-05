@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Crosshair, FilmStrip, Television, X, Bookmark,
   Star, User, Heart, Users, UsersThree,
@@ -216,10 +216,15 @@ export default function FocusMode() {
     set("avoid", next);
   };
 
+  useEffect(() => {
+    if (hasSearched && !isLoading) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [hasSearched, isLoading]);
+
   const handleSubmit = async () => {
     setIsLoading(true);
     setHasSearched(false);
-    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     try {
       const platforms: string[] = (() => {
         try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
@@ -323,8 +328,6 @@ export default function FocusMode() {
         </button>
       </div>
 
-      <div ref={resultsRef} />
-
       {/* Loading skeletons */}
       {isLoading && (
         <div className="fm-results">
@@ -345,7 +348,7 @@ export default function FocusMode() {
 
       {/* Results */}
       {hasSearched && !isLoading && (
-        <div className="fm-results">
+        <div ref={resultsRef} className="fm-results">
           <div className="fm-results-header">
             <p className="fm-results-label">Your picks</p>
             <p className="fm-results-sub">Tap a card to see why it's perfect for tonight</p>
