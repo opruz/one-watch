@@ -54,27 +54,31 @@ export const FOCUS_PICKS: FocusPick[] = [
     runtime: "~50 min/ep",
     imdb_score: 8.7,
     description:
-      "Employees at Lumon Industries undergo a surgical procedure that separates their work and personal memories. When one employee begins questioning the company's motives, the line between inside and outside starts to blur in terrifying ways.",
+      "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
     why_this:
       "Perfect tense watch — each episode ends on a cliffhanger that makes stopping feel impossible.",
-    // Electric teal → deep indigo → icy cyan — cold corporate nightmare
+    // Sage-grey corporate cool → deep slate → cold off-white — Lumon sterility
     posterGradient:
-      "linear-gradient(155deg, #00050f 0%, #001555 15%, #0038b8 32%, #0090e0 48%, #00c8f0 58%, #0060c8 74%, #001040 88%, #00050f 100%)",
+      "linear-gradient(155deg, #05080a 0%, #0d1a1e 16%, #1a3038 30%, #2a4a50 44%, #8aacaa 56%, #3a6060 70%, #102020 84%, #05080a 100%)",
     posterGlow:
-      "radial-gradient(ellipse 78% 65% at 46% 40%, rgba(0,200,255,0.82) 0%, rgba(0,100,220,0.55) 42%, rgba(0,30,120,0.2) 72%, transparent 100%)",
+      "radial-gradient(ellipse 76% 62% at 48% 38%, rgba(138,172,170,0.68) 0%, rgba(58,96,96,0.42) 44%, rgba(16,32,32,0.18) 72%, transparent 100%)",
+    thumbnailUrl: "/severance-thumbnail.jpg",
+    logoUrl: "/severance-logo.png",
+    posterUrl: "/severance-poster.webp",
+    watchPlatforms: ["Apple TV+"],
   },
   {
     id: "f2",
     title: "Everything Everywhere All at Once",
     year: 2022,
     type: "movie",
-    platform: "Max",
-    platformColor: "#702BE2",
+    platform: "Prime Video",
+    platformColor: "#00A8E1",
     mood_tags: ["Feel inspired", "Something funny"],
     runtime: "2h 19m",
     imdb_score: 8.0,
     description:
-      "A Chinese-American laundromat owner discovers she must connect with parallel universe versions of herself to prevent a powerful being from destroying the multiverse. Part sci-fi chaos, part family drama, part existential comedy.",
+      "A middle-aged Chinese immigrant is swept up into an insane adventure in which she alone can save existence by exploring other universes and connecting with the lives she could have led.",
     why_this:
       "Wildly creative and emotionally devastating — the rare film that's genuinely unlike anything else.",
     // Hot magenta → electric violet → neon cyan — multiverse chaos
@@ -82,46 +86,106 @@ export const FOCUS_PICKS: FocusPick[] = [
       "linear-gradient(155deg, #0a0018 0%, #4400c0 16%, #a800e0 30%, #ff00cc 44%, #ff4080 54%, #8000ff 67%, #0090c0 82%, #0a0018 100%)",
     posterGlow:
       "radial-gradient(ellipse 82% 68% at 50% 42%, rgba(255,0,200,0.78) 0%, rgba(160,0,255,0.5) 38%, rgba(0,150,220,0.25) 68%, transparent 100%)",
+    thumbnailUrl: "/eeaao-thumbnail.webp",
+    logoUrl: "/eeaao-logo.png",
+    posterUrl: "/eeaao-poster.jpg",
+    watchPlatforms: ["Prime Video"],
   },
   {
     id: "f3",
-    title: "The Bear",
-    year: 2022,
-    type: "series",
-    platform: "Hulu",
-    platformColor: "#1CE783",
-    mood_tags: ["Tense & gripping", "Feel inspired"],
-    runtime: "~30 min/ep",
-    imdb_score: 8.7,
+    title: "The Sheep Detectives",
+    year: 2025,
+    type: "movie",
+    platform: "Peacock",
+    platformColor: "#000000",
+    mood_tags: ["Something funny", "Cozy"],
+    runtime: "1h 38m",
+    imdb_score: 6.9,
     description:
-      "A Michelin-starred chef returns to Chicago to run his family's chaotic sandwich shop after a tragedy. A portrait of grief, ambition, and the relentless pursuit of excellence set inside a claustrophobically intense kitchen.",
+      "Every night a shepherd reads aloud a murder mystery, pretending his sheep can understand. When he is found dead, the sheep realize at once that it was a murder and think they know everything about how to go about solving it.",
     why_this:
-      "Short episodes, electric energy — you'll watch four before you realize an hour has passed.",
-    // Blazing amber → blood orange → molten red — kitchen fire
+      "A wonderfully absurd comedy that commits completely to its premise — by the end you'll be rooting for the sheep just as hard as any detective.",
+    // Sky blue → lush pastoral green → warm earth — sunlit English countryside
     posterGradient:
-      "linear-gradient(155deg, #180200 0%, #7a0800 16%, #d82000 30%, #ff5500 44%, #ffaa00 54%, #e03000 68%, #6a0500 84%, #180200 100%)",
+      "linear-gradient(155deg, #030810 0%, #0a2030 16%, #184838 30%, #2a7840 44%, #58b050 54%, #389838 68%, #152a10 84%, #030810 100%)",
     posterGlow:
-      "radial-gradient(ellipse 80% 65% at 48% 40%, rgba(255,160,0,0.85) 0%, rgba(240,60,0,0.58) 40%, rgba(140,0,0,0.22) 72%, transparent 100%)",
+      "radial-gradient(ellipse 78% 64% at 50% 42%, rgba(88,176,80,0.70) 0%, rgba(56,152,56,0.44) 44%, rgba(21,42,16,0.18) 72%, transparent 100%)",
+    thumbnailUrl: "/sheep-detectives-thumbnail.jpg",
+    logoUrl: "/sheep-detectives-logo.png",
+    posterUrl: "/sheep-detectives-poster.jpg",
+    watchPlatforms: ["Peacock"],
   },
   {
     id: "f4",
-    title: "Poor Things",
-    year: 2023,
+    title: "Baby Driver",
+    year: 2017,
     type: "movie",
-    platform: "Hulu",
-    platformColor: "#1CE783",
-    mood_tags: ["Feel inspired", "Something funny"],
-    runtime: "2h 21m",
-    imdb_score: 8.0,
+    platform: "Netflix",
+    platformColor: "#E50914",
+    mood_tags: ["Tense & gripping", "Turn brain off"],
+    runtime: "1h 53m",
+    imdb_score: 7.6,
     description:
-      "A young woman brought back to life by an eccentric surgeon escapes on a journey across Victorian Europe, discovering her own agency along the way. A visually stunning, darkly funny feminist fairy tale that looks unlike any film made before it.",
+      "Coerced into working for a crime boss, a young getaway driver must face the music when a doomed heist threatens his life, love, and freedom.",
     why_this:
-      "The production design alone is worth it — a film that genuinely surprises from first frame to last.",
-    // Vivid fuchsia → deep amethyst → cerulean — Victorian surrealism
+      "Edgar Wright choreographs action to music so precisely that every chase scene plays like a music video — pure style that never loses the plot.",
+    // Hot magenta → deep rose → dark — graphic poster energy
     posterGradient:
-      "linear-gradient(155deg, #0e0020 0%, #5500a8 16%, #b020c8 30%, #e858c0 44%, #ff80a0 54%, #9040e0 68%, #0070b0 83%, #0e0020 100%)",
+      "linear-gradient(155deg, #0e0008 0%, #480020 16%, #900038 30%, #d40060 44%, #ff3090 54%, #c80060 68%, #500028 84%, #0e0008 100%)",
     posterGlow:
-      "radial-gradient(ellipse 80% 66% at 52% 40%, rgba(240,80,220,0.78) 0%, rgba(140,40,220,0.5) 40%, rgba(0,100,180,0.22) 70%, transparent 100%)",
+      "radial-gradient(ellipse 76% 62% at 50% 44%, rgba(255,48,144,0.82) 0%, rgba(200,0,96,0.54) 42%, rgba(80,0,40,0.22) 72%, transparent 100%)",
+    thumbnailUrl: "/baby-driver-thumbnail.jpg",
+    logoUrl: "/baby-driver-logo.png",
+    posterUrl: "/baby-driver-poster.jpg",
+    watchPlatforms: ["Netflix", "Prime Video"],
+  },
+  {
+    id: "f5",
+    title: "The Sixth Sense",
+    year: 1999,
+    type: "movie",
+    platform: "Disney+",
+    platformColor: "#1A6EE5",
+    mood_tags: ["Tense & gripping"],
+    runtime: "1h 47m",
+    imdb_score: 8.1,
+    description:
+      "After being shot by a resentful former patient whom he failed to help, a Philadelphia child psychologist seeks redemption by treating a young boy with a disturbing secret.",
+    why_this:
+      "One of the rare twist endings that makes the whole film more rewatchable — once you know, you'll catch everything you missed the first time.",
+    // Deep amber → burnt orange → dark shadow — glowing dread
+    posterGradient:
+      "linear-gradient(155deg, #060200 0%, #200800 16%, #501200 30%, #902800 44%, #c85010 54%, #803008 68%, #280a00 84%, #060200 100%)",
+    posterGlow:
+      "radial-gradient(ellipse 72% 62% at 56% 44%, rgba(200,80,16,0.80) 0%, rgba(160,40,0,0.52) 44%, rgba(60,12,0,0.22) 72%, transparent 100%)",
+    thumbnailUrl: "/sixth-sense-thumbnail.avif",
+    logoUrl: "/sixth-sense-logo.png",
+    posterUrl: "/sixth-sense-poster.jpeg",
+    watchPlatforms: ["Disney+"],
+  },
+  {
+    id: "f6",
+    title: "The Lovely Bones",
+    year: 2009,
+    type: "movie",
+    platform: "Prime Video",
+    platformColor: "#00A8E1",
+    mood_tags: ["Want to cry", "Feel inspired"],
+    runtime: "2h 14m",
+    imdb_score: 6.7,
+    description:
+      "Centers on a young girl who has been murdered and watches over her family — and her killer — from purgatory. She must weigh her desire for vengeance against her desire for her family to heal.",
+    why_this:
+      "Peter Jackson at his most visually inventive — a haunting, bittersweet film that earns every emotion it goes for.",
+    // Stormy purple → warm peach sunset → dark earth — between-worlds light
+    posterGradient:
+      "linear-gradient(155deg, #050210 0%, #160a28 16%, #341558 30%, #603880 44%, #b06090 54%, #d0906a 66%, #804840 80%, #1a0818 100%)",
+    posterGlow:
+      "radial-gradient(ellipse 80% 66% at 54% 38%, rgba(208,144,106,0.76) 0%, rgba(176,96,144,0.48) 42%, rgba(96,56,128,0.22) 70%, transparent 100%)",
+    thumbnailUrl: "/lovely-bones-thumbnail.jpg",
+    logoUrl: "/lovely-bones-logo.png",
+    posterUrl: "/lovely-bones-poster.jpg",
+    watchPlatforms: ["Prime Video"],
   },
 ];
 
