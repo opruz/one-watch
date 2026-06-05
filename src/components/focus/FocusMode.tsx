@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Crosshair, FilmStrip, Television, X, Bookmark,
   Star, User, Heart, Users, UsersThree,
@@ -201,6 +201,7 @@ export default function FocusMode() {
   const [answers, setAnswers] = useState<Answers>(DEFAULT);
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [picks, setPicks] = useState<FocusPick[]>(FOCUS_PICKS);
   const [expanded, setExpanded] = useState<FocusPick | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
@@ -218,6 +219,7 @@ export default function FocusMode() {
   const handleSubmit = async () => {
     setIsLoading(true);
     setHasSearched(false);
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     try {
       const platforms: string[] = (() => {
         try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
@@ -320,6 +322,8 @@ export default function FocusMode() {
           {isLoading ? <span className="fm-spinner" /> : "Find something to watch"}
         </button>
       </div>
+
+      <div ref={resultsRef} />
 
       {/* Loading skeletons */}
       {isLoading && (
