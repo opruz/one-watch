@@ -972,8 +972,31 @@ input  { font-family: inherit; }
   background: #0c0c18;
   padding: 1.6rem 2rem 2rem;
   display: flex;
+  flex-direction: row;
+  gap: 1.8rem;
+  align-items: flex-start;
+}
+
+.fm-gallery-details-content {
+  flex: 1;
+  display: flex;
   flex-direction: column;
   gap: 1.1rem;
+  min-width: 0;
+}
+
+.fm-gallery-details-poster {
+  width: 96px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+}
+
+.fm-gallery-details-poster img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .fm-gallery-details-why {
@@ -1031,7 +1054,7 @@ input  { font-family: inherit; }
 
 .fm-gallery-desc {
   font-size: 0.75rem;
-  color: rgba(255,255,255,0.82);
+  color: #fff;
   line-height: 1.55;
   text-shadow: 0 1px 6px rgba(0,0,0,0.6);
   display: -webkit-box;

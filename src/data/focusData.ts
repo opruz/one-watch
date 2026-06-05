@@ -14,6 +14,7 @@ export interface FocusPick {
   posterGlow: string;
   thumbnailUrl?: string;
   logoUrl?: string;
+  posterUrl?: string;
   watchPlatforms?: string[];
 }
 
@@ -39,6 +40,7 @@ export const FOCUS_PICKS: FocusPick[] = [
       "radial-gradient(ellipse 75% 60% at 50% 42%, rgba(176,120,64,0.72) 0%, rgba(120,80,40,0.45) 44%, rgba(50,25,8,0.2) 72%, transparent 100%)",
     thumbnailUrl: "/knives-out-thumbnail.jpg",
     logoUrl: "/knives-out-logo.png.webp",
+    posterUrl: "/knives-out-poster.jpg",
     watchPlatforms: ["Prime Video", "Apple TV+"],
   },
   {

@@ -118,7 +118,7 @@ function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSav
   onClick: () => void; saved: boolean; onSave: () => void; onRefresh: () => void;
 }) {
   const abs     = Math.abs(offset);
-  const scale   = Math.max(0.78, 1 - abs * 0.1);
+  const scale   = isExpanded ? 1.03 : Math.max(0.78, 1 - abs * 0.1);
   const blur    = abs * 4;
   const opacity = Math.max(0.5, 1 - abs * 0.28);
   const step    = 870;
@@ -171,36 +171,43 @@ function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSav
         <div className={`fm-gallery-details-wrap${isExpanded ? " fm-gallery-details-wrap--open" : ""}`}>
           <div>
             <div className="fm-gallery-details" onClick={(e) => e.stopPropagation()}>
-              <p className="fm-gallery-details-why">"{pick.why_this}"</p>
-              <div className="fm-gallery-details-actions">
-                {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
-                  <div className="fm-gallery-watch">
-                    {pick.watchPlatforms.map((plat) => (
-                      <button key={plat} type="button" className="fm-watch-btn">
-                        <img src={PLATFORM_LOGOS[plat] ?? ""} alt={plat} className="fm-watch-btn-logo" />
-                        <span>Watch now</span>
-                      </button>
-                    ))}
+              <div className="fm-gallery-details-content">
+                <p className="fm-gallery-details-why">"{pick.why_this}"</p>
+                <div className="fm-gallery-details-actions">
+                  {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
+                    <div className="fm-gallery-watch">
+                      {pick.watchPlatforms.map((plat) => (
+                        <button key={plat} type="button" className="fm-watch-btn">
+                          <img src={PLATFORM_LOGOS[plat] ?? ""} alt={plat} className="fm-watch-btn-logo" />
+                          <span>Watch now</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="fm-gallery-details-btns">
+                    <button
+                      type="button"
+                      className={`fm-save-btn${saved ? " fm-save-btn--saved" : ""}`}
+                      onClick={(e) => { e.stopPropagation(); onSave(); }}
+                    >
+                      <Bookmark size={15} weight={saved ? "fill" : "regular"} />
+                      {saved ? "Saved" : "Save for later"}
+                    </button>
+                    <button
+                      type="button"
+                      className="fm-close-btn"
+                      onClick={(e) => { e.stopPropagation(); onRefresh(); }}
+                    >
+                      Not for me — try another
+                    </button>
                   </div>
-                )}
-                <div className="fm-gallery-details-btns">
-                  <button
-                    type="button"
-                    className={`fm-save-btn${saved ? " fm-save-btn--saved" : ""}`}
-                    onClick={(e) => { e.stopPropagation(); onSave(); }}
-                  >
-                    <Bookmark size={15} weight={saved ? "fill" : "regular"} />
-                    {saved ? "Saved" : "Save for later"}
-                  </button>
-                  <button
-                    type="button"
-                    className="fm-close-btn"
-                    onClick={(e) => { e.stopPropagation(); onRefresh(); }}
-                  >
-                    Not for me — try another
-                  </button>
                 </div>
               </div>
+              {pick.posterUrl && (
+                <div className="fm-gallery-details-poster">
+                  <img src={pick.posterUrl} alt={`${pick.title} poster`} draggable={false} />
+                </div>
+              )}
             </div>
           </div>
         </div>
