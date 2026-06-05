@@ -991,7 +991,7 @@ input  { font-family: inherit; }
   background: rgba(255,255,255,0.13);
   border: 1px solid rgba(255,255,255,0.22);
   border-radius: var(--r-xs);
-  padding: 0.55rem 0.9rem;
+  padding: 0.75rem 0.9rem 0.55rem;
   color: rgba(255,255,255,0.72);
   font-size: 0.68rem;
   font-weight: 400;
