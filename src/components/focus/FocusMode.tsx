@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Crosshair, FilmStrip, Television, X, Bookmark,
+  Crosshair, Television, X, Bookmark,
   Star, User, Heart, Users, UsersThree,
   Coffee, Lightning, Drop, Sparkle, Smiley,
   Clock, Moon,
@@ -112,63 +112,10 @@ function QSection({ label, children }: { label: string; children: React.ReactNod
   );
 }
 
-/* ── Expanded Detail Sheet ── */
-function ExpandedSheet({ pick, onClose, saved, onSave, onRefresh }: {
-  pick: FocusPick; onClose: () => void; saved: boolean; onSave: () => void; onRefresh: () => void;
-}) {
-  return (
-    <div className="fm-overlay" onClick={onClose} role="presentation">
-      <div className="fm-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <button type="button" className="fm-close" onClick={onClose} aria-label="Close">
-          <X size={18} weight="bold" />
-        </button>
-        <div className="fm-sheet-poster" style={{ background: pick.posterGradient }}>
-          <div className="fm-poster-glow" style={{ background: pick.posterGlow }} />
-          <div className="fm-poster-grain" />
-          <div className="fm-sheet-poster-content">
-            <p className="fm-sheet-poster-type">
-              {pick.type === "movie"
-                ? <><FilmStrip size={13} weight="bold" /> Film</>
-                : <><Television size={13} weight="bold" /> Series</>
-              } · {pick.runtime}
-            </p>
-            <h2 className="fm-sheet-poster-title">{pick.title}</h2>
-            <div className="fm-sheet-poster-tags">
-              {pick.mood_tags.map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
-            </div>
-          </div>
-          <div className="fm-poster-score">★ {pick.imdb_score}</div>
-        </div>
-        <div className="fm-sheet-body">
-          <div className="fm-sheet-meta">
-            <span>{pick.year}</span>
-            <span className="fm-sep">·</span>
-            <span style={{ color: pick.platformColor }}>{pick.platform}</span>
-          </div>
-          <p className="fm-sheet-desc">{pick.description}</p>
-          <p className="fm-sheet-why">"{pick.why_this}"</p>
-          <div className="fm-sheet-actions">
-            <button
-              type="button"
-              className={`fm-save-btn${saved ? " fm-save-btn--saved" : ""}`}
-              onClick={onSave}
-            >
-              <Bookmark size={16} weight={saved ? "fill" : "regular"} />
-              {saved ? "Saved" : "Save for later"}
-            </button>
-            <button type="button" className="fm-close-btn" onClick={() => { onRefresh(); onClose(); }}>
-              Not for me — try another
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── Gallery Card ── */
-function GalleryCard({ pick, offset, isActive, onClick }: {
-  pick: FocusPick; offset: number; isActive: boolean; onClick: () => void;
+function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSave, onRefresh }: {
+  pick: FocusPick; offset: number; isActive: boolean; isExpanded: boolean;
+  onClick: () => void; saved: boolean; onSave: () => void; onRefresh: () => void;
 }) {
   const abs     = Math.abs(offset);
   const scale   = Math.max(0.78, 1 - abs * 0.1);
@@ -178,57 +125,86 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
 
   return (
     <div
-      className="fm-gallery-slot"
-      style={{ transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`, zIndex: 10 - abs }}
+      className={`fm-gallery-slot${isActive ? " fm-gallery-slot--active" : ""}`}
+      style={{ transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`, zIndex: isExpanded ? 20 : 10 - abs }}
       onClick={onClick}
     >
       <div
-        className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}`}
+        className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}${isExpanded ? " fm-gallery-card--expanded" : ""}`}
         style={{
           transform: `scale(${scale})`,
           filter: blur > 0 ? `blur(${blur}px)` : "none",
           opacity,
         }}
       >
-        {pick.thumbnailUrl ? (
-          <div
-            className="fm-gallery-bg fm-gallery-bg--photo"
-            style={{ backgroundImage: `url(${pick.thumbnailUrl})` }}
-          >
-            <div className="fm-poster-grain" />
-            <div className="fm-gallery-scrim fm-gallery-scrim--photo" />
-          </div>
-        ) : (
-          <div className="fm-gallery-bg" style={{ background: pick.posterGradient }}>
-            <div className="fm-gallery-glow" style={{ background: pick.posterGlow }} />
-            <div className="fm-poster-grain" />
-            <div className="fm-gallery-scrim" />
-          </div>
-        )}
-        <div className="fm-gallery-overlay">
-          <div className="fm-gallery-panel">
-            {pick.logoUrl ? (
-              <img src={pick.logoUrl} alt={pick.title} className="fm-gallery-logo" draggable={false} />
-            ) : (
-              <h3 className="fm-gallery-title">{pick.title}</h3>
-            )}
-            <div className="fm-gallery-tags">
-              {pick.mood_tags.slice(0, 3).map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
+        {/* Poster — always 16:9, contains all absolutely-positioned layers */}
+        <div className="fm-gallery-poster">
+          {pick.thumbnailUrl ? (
+            <div className="fm-gallery-bg fm-gallery-bg--photo" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }}>
+              <div className="fm-poster-grain" />
             </div>
-            <p className="fm-gallery-meta">{pick.year} · {pick.runtime} · ★ {pick.imdb_score}</p>
-            <p className="fm-gallery-desc">{pick.description}</p>
-            {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
-              <div className="fm-gallery-watch">
-                {pick.watchPlatforms.map((plat) => (
-                  <button key={plat} type="button" className="fm-watch-btn">
-                    <img src={PLATFORM_LOGOS[plat] ?? ""} alt={plat} className="fm-watch-btn-logo" />
-                    <span>Watch now</span>
-                  </button>
-                ))}
+          ) : (
+            <div className="fm-gallery-bg" style={{ background: pick.posterGradient }}>
+              <div className="fm-gallery-glow" style={{ background: pick.posterGlow }} />
+              <div className="fm-poster-grain" />
+            </div>
+          )}
+          <div className={`fm-gallery-scrim${pick.thumbnailUrl ? " fm-gallery-scrim--photo" : ""}`} />
+          {isExpanded && <div className="fm-gallery-expand-fade" />}
+          <div className="fm-gallery-overlay">
+            <div className="fm-gallery-panel">
+              {pick.logoUrl ? (
+                <img src={pick.logoUrl} alt={pick.title} className="fm-gallery-logo" draggable={false} />
+              ) : (
+                <h3 className="fm-gallery-title">{pick.title}</h3>
+              )}
+              <div className="fm-gallery-tags">
+                {pick.mood_tags.slice(0, 3).map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
               </div>
-            )}
+              <p className="fm-gallery-meta">{pick.year} · {pick.runtime} · ★ {pick.imdb_score}</p>
+              <p className="fm-gallery-desc">{pick.description}</p>
+            </div>
           </div>
         </div>
+
+        {/* Expandable details panel */}
+        <div className={`fm-gallery-details-wrap${isExpanded ? " fm-gallery-details-wrap--open" : ""}`}>
+          <div>
+            <div className="fm-gallery-details" onClick={(e) => e.stopPropagation()}>
+              <p className="fm-gallery-details-why">"{pick.why_this}"</p>
+              <div className="fm-gallery-details-actions">
+                {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
+                  <div className="fm-gallery-watch">
+                    {pick.watchPlatforms.map((plat) => (
+                      <button key={plat} type="button" className="fm-watch-btn">
+                        <img src={PLATFORM_LOGOS[plat] ?? ""} alt={plat} className="fm-watch-btn-logo" />
+                        <span>Watch now</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="fm-gallery-details-btns">
+                  <button
+                    type="button"
+                    className={`fm-save-btn${saved ? " fm-save-btn--saved" : ""}`}
+                    onClick={(e) => { e.stopPropagation(); onSave(); }}
+                  >
+                    <Bookmark size={15} weight={saved ? "fill" : "regular"} />
+                    {saved ? "Saved" : "Save for later"}
+                  </button>
+                  <button
+                    type="button"
+                    className="fm-close-btn"
+                    onClick={(e) => { e.stopPropagation(); onRefresh(); }}
+                  >
+                    Not for me — try another
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {!isActive && <div className="fm-gallery-dim" />}
       </div>
     </div>
@@ -242,7 +218,7 @@ export default function FocusMode() {
   const [isLoading, setIsLoading]   = useState(false);
   const [picks, setPicks]           = useState<FocusPick[]>(FOCUS_PICKS);
   const [activeIdx, setActiveIdx]   = useState(0);
-  const [expanded, setExpanded]     = useState<FocusPick | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saved, setSaved]           = useState<string[]>([]);
   const questionnaireRef            = useRef<HTMLDivElement>(null);
   const resultsRef                  = useRef<HTMLDivElement>(null);
@@ -272,6 +248,7 @@ export default function FocusMode() {
   const handleSubmit = async () => {
     setIsLoading(true);
     setHasSearched(false);
+    setExpandedId(null);
     try {
       const platforms = getPlatforms();
       const recs = await getRecommendations(platforms.length ? platforms : ["Netflix", "Prime", "Hulu"], answers);
@@ -365,28 +342,29 @@ export default function FocusMode() {
               ↑ Change your answers
             </button>
           </div>
-          <div className="fm-gallery">
+          <div className={`fm-gallery${expandedId ? " fm-gallery--expanded" : ""}`}>
             {picks.map((pick, i) => (
               <GalleryCard
                 key={pick.id}
                 pick={pick}
                 offset={i - activeIdx}
                 isActive={i === activeIdx}
-                onClick={() => { if (i === activeIdx) setExpanded(pick); else setActiveIdx(i); }}
+                isExpanded={i === activeIdx && expandedId === pick.id}
+                onClick={() => {
+                  if (i === activeIdx) {
+                    setExpandedId((prev) => prev === pick.id ? null : pick.id);
+                  } else {
+                    setActiveIdx(i);
+                    setExpandedId(null);
+                  }
+                }}
+                saved={saved.includes(pick.id)}
+                onSave={() => toggleSave(pick)}
+                onRefresh={() => { setExpandedId(null); void handleRefreshCard(pick); }}
               />
             ))}
           </div>
         </div>
-      )}
-
-      {expanded && (
-        <ExpandedSheet
-          pick={expanded}
-          onClose={() => setExpanded(null)}
-          saved={saved.includes(expanded.id)}
-          onSave={() => toggleSave(expanded)}
-          onRefresh={() => { void handleRefreshCard(expanded); }}
-        />
       )}
     </div>
   );

@@ -844,6 +844,11 @@ input  { font-family: inherit; }
   height: 62vh;
   min-height: 380px;
   overflow: hidden;
+  transition: overflow 0s;
+}
+
+.fm-gallery--expanded {
+  overflow: visible;
 }
 
 .fm-gallery-slot {
@@ -858,15 +863,24 @@ input  { font-family: inherit; }
 
 .fm-gallery-card {
   width: 100%;
-  aspect-ratio: 16 / 9;
   border-radius: var(--r);
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
   transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
               filter 0.45s ease,
               opacity 0.45s ease;
   transform-origin: center center;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.fm-gallery-poster {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .fm-gallery-bg {
@@ -928,6 +942,57 @@ input  { font-family: inherit; }
   inset: 0;
   background: rgba(0, 0, 0, 0.22);
   pointer-events: none;
+}
+
+.fm-gallery-expand-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(to bottom, transparent 0%, #0c0c18 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.fm-gallery-details-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fm-gallery-details-wrap--open {
+  grid-template-rows: 1fr;
+}
+
+.fm-gallery-details-wrap > div {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.fm-gallery-details {
+  background: #0c0c18;
+  padding: 1.6rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.fm-gallery-details-why {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.65);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.fm-gallery-details-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.fm-gallery-details-btns {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .fm-gallery-overlay {
