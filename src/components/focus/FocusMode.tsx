@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Crosshair, Television, X, Bookmark,
+  Crosshair, Television, X,
   Star, User, Heart, Users, UsersThree,
   Coffee, Lightning, Drop, Sparkle, Smiley,
   Clock, Moon,
@@ -8,13 +8,13 @@ import {
 import { getRecommendations, getOneRecommendation } from "../../lib/claude";
 import {
   FOCUS_PICKS,
-  PLATFORM_LOGOS,
   AUDIENCE_OPTIONS,
   MOOD_OPTIONS,
   TIME_OPTIONS,
   AVOID_OPTIONS,
   type FocusPick,
 } from "../../data/focusData";
+import MovieDetailPage from "./MovieDetailPage";
 
 interface Answers {
   audience: string;
@@ -113,9 +113,8 @@ function QSection({ label, children }: { label: string; children: React.ReactNod
 }
 
 /* ── Gallery Card ── */
-function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSave, onRefresh }: {
-  pick: FocusPick; offset: number; isActive: boolean; isExpanded: boolean;
-  onClick: () => void; saved: boolean; onSave: () => void; onRefresh: () => void;
+function GalleryCard({ pick, offset, isActive, onClick }: {
+  pick: FocusPick; offset: number; isActive: boolean; onClick: () => void;
 }) {
   const abs     = Math.abs(offset);
   const scale   = Math.max(0.78, 1 - abs * 0.1);
@@ -126,18 +125,17 @@ function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSav
   return (
     <div
       className={`fm-gallery-slot${isActive ? " fm-gallery-slot--active" : ""}`}
-      style={{ transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`, zIndex: isExpanded ? 20 : 10 - abs }}
+      style={{ transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`, zIndex: 10 - abs }}
       onClick={onClick}
     >
       <div
-        className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}${isExpanded ? " fm-gallery-card--expanded" : ""}`}
+        className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}`}
         style={{
           transform: `scale(${scale})`,
           filter: blur > 0 ? `blur(${blur}px)` : "none",
           opacity,
         }}
       >
-        {/* Poster — always 16:9, contains all absolutely-positioned layers */}
         <div className="fm-gallery-poster">
           {pick.thumbnailUrl ? (
             <div className="fm-gallery-bg fm-gallery-bg--photo" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }}>
@@ -150,7 +148,6 @@ function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSav
             </div>
           )}
           <div className={`fm-gallery-scrim${pick.thumbnailUrl ? " fm-gallery-scrim--photo" : ""}`} />
-          {isExpanded && <div className="fm-gallery-expand-fade" />}
           <div className="fm-gallery-overlay">
             <div className="fm-gallery-panel">
               {pick.logoUrl ? (
@@ -166,52 +163,6 @@ function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSav
             </div>
           </div>
         </div>
-
-        {/* Expandable details panel */}
-        <div className={`fm-gallery-details-wrap${isExpanded ? " fm-gallery-details-wrap--open" : ""}`}>
-          <div>
-            <div className="fm-gallery-details" onClick={(e) => e.stopPropagation()}>
-              <div className="fm-gallery-details-content">
-                <p className="fm-gallery-details-why">"{pick.why_this}"</p>
-                <div className="fm-gallery-details-actions">
-                  {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
-                    <div className="fm-gallery-watch">
-                      {pick.watchPlatforms.map((plat) => (
-                        <button key={plat} type="button" className="fm-watch-btn">
-                          <img src={PLATFORM_LOGOS[plat] ?? ""} alt={plat} className="fm-watch-btn-logo" />
-                          <span>Watch now</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <div className="fm-gallery-details-btns">
-                    <button
-                      type="button"
-                      className={`fm-save-btn${saved ? " fm-save-btn--saved" : ""}`}
-                      onClick={(e) => { e.stopPropagation(); onSave(); }}
-                    >
-                      <Bookmark size={15} weight={saved ? "fill" : "regular"} />
-                      {saved ? "Saved" : "Save for later"}
-                    </button>
-                    <button
-                      type="button"
-                      className="fm-close-btn"
-                      onClick={(e) => { e.stopPropagation(); onRefresh(); }}
-                    >
-                      Not for me — try another
-                    </button>
-                  </div>
-                </div>
-              </div>
-              {pick.posterUrl && (
-                <div className="fm-gallery-details-poster">
-                  <img src={pick.posterUrl} alt={`${pick.title} poster`} draggable={false} />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
         {!isActive && <div className="fm-gallery-dim" />}
       </div>
     </div>
@@ -225,7 +176,8 @@ export default function FocusMode() {
   const [isLoading, setIsLoading]   = useState(false);
   const [picks, setPicks]           = useState<FocusPick[]>(FOCUS_PICKS);
   const [activeIdx, setActiveIdx]   = useState(0);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [detailPick, setDetailPick] = useState<FocusPick | null>(null);
+  const [isClosingDetail, setIsClosingDetail] = useState(false);
   const [saved, setSaved]           = useState<string[]>([]);
   const questionnaireRef            = useRef<HTMLDivElement>(null);
   const resultsRef                  = useRef<HTMLDivElement>(null);
@@ -255,7 +207,7 @@ export default function FocusMode() {
   const handleSubmit = async () => {
     setIsLoading(true);
     setHasSearched(false);
-    setExpandedId(null);
+    setDetailPick(null);
     try {
       const platforms = getPlatforms();
       const recs = await getRecommendations(platforms.length ? platforms : ["Netflix", "Prime", "Hulu"], answers);
@@ -282,6 +234,16 @@ export default function FocusMode() {
 
   const toggleSave = (pick: FocusPick) =>
     setSaved((prev) => prev.includes(pick.id) ? prev.filter((id) => id !== pick.id) : [...prev, pick.id]);
+
+  const closeDetail = useCallback(() => {
+    setIsClosingDetail(true);
+    setTimeout(() => { setDetailPick(null); setIsClosingDetail(false); }, 400);
+  }, []);
+
+  const handleDetailRefresh = useCallback((pick: FocusPick) => {
+    closeDetail();
+    setTimeout(() => { void handleRefreshCard(pick); }, 420);
+  }, [closeDetail]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scrollToQuestionnaire = () => {
     if (questionnaireRef.current) smoothScrollToTop(questionnaireRef.current);
@@ -349,9 +311,6 @@ export default function FocusMode() {
               ↑ Change your answers
             </button>
           </div>
-          {expandedId && (
-            <div className="fm-gallery-backdrop" onClick={() => setExpandedId(null)} />
-          )}
           <div className="fm-gallery">
             {picks.map((pick, i) => (
               <GalleryCard
@@ -359,22 +318,25 @@ export default function FocusMode() {
                 pick={pick}
                 offset={i - activeIdx}
                 isActive={i === activeIdx}
-                isExpanded={i === activeIdx && expandedId === pick.id}
                 onClick={() => {
-                  if (i === activeIdx) {
-                    setExpandedId((prev) => prev === pick.id ? null : pick.id);
-                  } else {
-                    setActiveIdx(i);
-                    setExpandedId(null);
-                  }
+                  if (i === activeIdx) setDetailPick(pick);
+                  else setActiveIdx(i);
                 }}
-                saved={saved.includes(pick.id)}
-                onSave={() => toggleSave(pick)}
-                onRefresh={() => { setExpandedId(null); void handleRefreshCard(pick); }}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {(detailPick || isClosingDetail) && detailPick && (
+        <MovieDetailPage
+          pick={detailPick}
+          saved={saved.includes(detailPick.id)}
+          isClosing={isClosingDetail}
+          onSave={() => toggleSave(detailPick)}
+          onRefresh={() => handleDetailRefresh(detailPick)}
+          onClose={closeDetail}
+        />
       )}
     </div>
   );

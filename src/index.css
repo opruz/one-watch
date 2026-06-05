@@ -1865,3 +1865,193 @@ input  { font-family: inherit; }
 .modal__label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.35rem; }
 .modal__provider-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1rem; }
 .modal__watch { width: 100%; padding: 0.65rem; }
+
+/* ===== MOVIE DETAIL PAGE ===== */
+@keyframes mdp-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes mdp-exit {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes mdp-hero-enter {
+  from { transform: scale(1.07); }
+  to   { transform: scale(1); }
+}
+@keyframes mdp-hero-exit {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+@keyframes mdp-content-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mdp {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  animation: mdp-enter 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.mdp::-webkit-scrollbar { display: none; }
+
+.mdp--closing {
+  animation: mdp-exit 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+.mdp--closing .mdp-hero-bg {
+  animation: mdp-hero-exit 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Hero */
+.mdp-hero {
+  width: 100%;
+  height: clamp(300px, 54vh, 640px);
+  position: relative;
+  overflow: hidden;
+}
+
+.mdp-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  animation: mdp-hero-enter 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.mdp-hero-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Gradient that fades the hero into the page background — no left scrim */
+.mdp-hero-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60%;
+  background: linear-gradient(to bottom, transparent 0%, var(--bg) 100%);
+  pointer-events: none;
+}
+
+.mdp-back {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  background: rgba(0,0,0,0.42);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--r-xs);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.38rem 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  z-index: 1;
+}
+.mdp-back:hover { background: rgba(0,0,0,0.62); }
+
+/* Content */
+.mdp-content {
+  max-width: 900px;
+  margin: -3rem auto 0;
+  padding: 0 2rem 5rem;
+  position: relative;
+  z-index: 1;
+  animation: mdp-content-up 0.5s 0.14s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.mdp-content-main {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.mdp-content-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.mdp-logo {
+  max-height: 60px;
+  max-width: 240px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.mdp-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.mdp-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.mdp-meta {
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.02em;
+}
+
+.mdp-desc {
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.88);
+  line-height: 1.65;
+}
+
+.mdp-why {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.48);
+  font-style: italic;
+  line-height: 1.55;
+}
+
+.mdp-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.mdp-watch {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.mdp-btns {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.mdp-poster {
+  width: 116px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.6);
+  margin-top: 0.3rem;
+}
+
+.mdp-poster img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
