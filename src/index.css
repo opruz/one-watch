@@ -675,7 +675,7 @@ input  { font-family: inherit; }
 
 .fm-gallery-section {
   width: 100%;
-  padding: 0.5rem 0 2rem;
+  padding: 28vh 0 20vh;
 }
 
 .fm-gallery-section--loading {
