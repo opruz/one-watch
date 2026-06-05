@@ -3,12 +3,12 @@ import { useState } from "react";
 const PLATFORMS = [
   { id: "Netflix",     logo: "/netflix-logo.png" },
   { id: "Prime Video", logo: "/prime-video-logo.png" },
-  { id: "Disney+",     logo: "/disney-plus-logo.png" },
-  { id: "HBO Max",     logo: "/hbo-max-logo.jpeg" },
+  { id: "Disney+",     logo: "/disney-plus-logo.svg" },
+  { id: "HBO Max",     logo: "/hbo-max-logo.png" },
   { id: "Hulu",        logo: "/hulu-logo.png" },
   { id: "Apple TV+",   logo: "/apple-tv-plus-logo.png" },
   { id: "Peacock",     logo: "/peacock-logo.png" },
-  { id: "Tubi",        logo: "/tubi-logo.png" },
+  { id: "Tubi",        logo: "/tubi-logo.svg" },
 ];
 
 interface OnboardingProps {
