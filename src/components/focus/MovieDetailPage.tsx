@@ -19,7 +19,8 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
   const heroRef    = useRef<HTMLDivElement>(null);
   const bodyRef    = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const fromRef    = useRef<string | null>(null); /* stores the "from" transform for exit reversal */
+  /* stores entry values so exit can reverse them */
+  const fromRef = useRef<{ tx: number; ty: number; clip: string } | null>(null);
 
   /* ── Entry FLIP ── */
   useLayoutEffect(() => {
@@ -31,33 +32,42 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
     const heroRect = heroEl.getBoundingClientRect();
 
     /*
-     * Uniform scale so the image never stretches — match card width only.
-     * transform-origin: center bottom → image grows upward from the card's
-     * bottom edge, expands symmetrically left/right.
+     * Translate-only (no scale): shift the full-size hero so its bottom aligns
+     * with the card's bottom and its horizontal center aligns with the card center.
+     * clip-path then reveals only the card-sized window; both animate to their
+     * natural states so the image grows from the card outward without distortion.
      */
-    const sx = fromRect.width / heroRect.width;
-
-    /* Align hero's bottom-center to card's bottom-center */
     const tx = (fromRect.left + fromRect.width * 0.5) - heroRect.width * 0.5;
     const ty = fromRect.bottom - heroRect.height;
 
-    const heroFrom = `translate(${tx}px,${ty}px) scale(${sx})`;
-    fromRef.current = heroFrom;
+    /* Horizontal clip: hide the hero outside the card's width (in element space) */
+    const hClip = Math.max(0, heroRect.width * 0.5 - fromRect.width * 0.5);
+
+    /* Vertical top clip: if the hero is taller than the card, clip from the top
+       so the visible window starts at the card's top (in element space).
+       If the card is taller than the hero, no top clip is needed (vClip = 0). */
+    const vClip = Math.max(0, heroRect.height - fromRect.height);
+
+    const CARD_RADIUS = 16; /* match var(--r) */
+    const fromClip = `inset(${vClip}px ${hClip}px 0px ${hClip}px round ${CARD_RADIUS}px)`;
+
+    fromRef.current = { tx, ty, clip: fromClip };
 
     /* Instant "first" state — runs before browser paints */
-    heroEl.style.transition      = "none";
-    heroEl.style.transformOrigin = "center bottom";
-    heroEl.style.transform       = heroFrom;
-    bodyEl.style.transition      = "none";
-    bodyEl.style.opacity         = "0";
-    contentEl.style.transition   = "none";
-    contentEl.style.opacity      = "0";
-    contentEl.style.transform    = "translateY(-48px)";
+    heroEl.style.transition = "none";
+    heroEl.style.transform  = `translate(${tx}px,${ty}px)`;
+    heroEl.style.clipPath   = fromClip;
+    bodyEl.style.transition = "none";
+    bodyEl.style.opacity    = "0";
+    contentEl.style.transition = "none";
+    contentEl.style.opacity  = "0";
+    contentEl.style.transform = "translateY(-48px)";
 
     /* Animate to final state after first paint */
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      heroEl.style.transition  = `transform ${DUR}ms ${EASE}`;
-      heroEl.style.transform   = "none";
+      heroEl.style.transition = `transform ${DUR}ms ${EASE}, clip-path ${DUR}ms ${EASE}`;
+      heroEl.style.transform  = "none";
+      heroEl.style.clipPath   = "inset(0px 0px 0px 0px round 0px)";
       bodyEl.style.transition  = `opacity ${DUR}ms ${EASE}`;
       bodyEl.style.opacity     = "1";
       const delay = Math.round(DUR * 0.2);
@@ -74,11 +84,12 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
     const contentEl = contentRef.current;
     if (!isClosing || !fromRef.current || !heroEl || !bodyEl || !contentEl) return;
 
-    const heroFrom = fromRef.current;
+    const { tx, ty, clip } = fromRef.current;
     const dur = DUR - 50;
 
-    heroEl.style.transition  = `transform ${dur}ms ${EASE}`;
-    heroEl.style.transform   = heroFrom;
+    heroEl.style.transition = `transform ${dur}ms ${EASE}, clip-path ${dur}ms ${EASE}`;
+    heroEl.style.transform  = `translate(${tx}px,${ty}px)`;
+    heroEl.style.clipPath   = clip;
     bodyEl.style.transition  = `opacity ${dur}ms ${EASE}`;
     bodyEl.style.opacity     = "0";
     contentEl.style.transition = `opacity ${Math.round(dur * 0.5)}ms ${EASE}`;

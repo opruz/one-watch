@@ -1916,7 +1916,7 @@ input  { font-family: inherit; }
   height: clamp(300px, 54vh, 640px);
   z-index: 201;
   overflow: hidden;
-  will-change: transform;
+  will-change: transform, clip-path;
 }
 
 /* Body — scrollable page content, sits behind the hero */
