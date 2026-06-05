@@ -668,24 +668,41 @@ input  { font-family: inherit; }
 
 /* ===== FOCUS MODE ===== */
 .fm-page {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  width: 100%;
 }
 
-.fm-gallery-section {
-  width: 100%;
-  padding: 28vh 0 20vh;
+/* Two-pane horizontal slider */
+.fm-views {
+  display: flex;
+  flex-direction: row;
+  width: 200%;
+  height: 100%;
+  transition: transform 0.48s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.fm-views--r { transform: translateX(-50%); }
 
-.fm-gallery-section--loading {
-  padding: 0;
+.fm-view {
+  width: 50%;
+  height: 100%;
+  flex-shrink: 0;
+}
+.fm-view--q {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+.fm-view--r {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .fm-gallery-skeleton {
-  width: 100%;
-  height: 55vh;
-  min-height: 340px;
+  flex: 1;
   background: var(--bg-lift);
   animation: fm-shimmer 1.4s ease-in-out infinite;
 }
@@ -693,10 +710,12 @@ input  { font-family: inherit; }
 .fm-gallery-header {
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 1.4rem 0.9rem;
+  padding: 1.2rem 1.4rem 0.7rem;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .fm-change-answers-btn {
@@ -841,8 +860,8 @@ input  { font-family: inherit; }
 .fm-gallery {
   position: relative;
   width: 100%;
-  height: 62vh;
-  min-height: 380px;
+  flex: 1;
+  min-height: 0;
   overflow: visible;
 }
 
@@ -1892,26 +1911,43 @@ input  { font-family: inherit; }
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: var(--bg);
+  pointer-events: auto;
+}
+
+.mdp--closing { pointer-events: none; }
+
+/* Hero — position: fixed so FLIP transforms are never clipped by a scroll container */
+.mdp-hero {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: clamp(300px, 54vh, 640px);
+  z-index: 201;
+  overflow: hidden;
+  will-change: transform;
+}
+
+/* Body — scrollable page content, sits behind the hero */
+.mdp-body {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-top: clamp(300px, 54vh, 640px);
+  background: var(--bg);
   scrollbar-width: none;
+  /* fallback animation when no FLIP rect */
   animation: mdp-enter 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-.mdp::-webkit-scrollbar { display: none; }
+.mdp-body::-webkit-scrollbar { display: none; }
 
-.mdp--closing {
+.mdp--closing .mdp-body {
   animation: mdp-exit 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  pointer-events: none;
-}
-.mdp--closing .mdp-hero-bg {
-  animation: mdp-hero-exit 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Suppress CSS animations when FLIP JS animation is active */
-/* Use double-class for higher specificity than .mdp / .mdp--closing */
-.mdp.mdp--flip,
-.mdp.mdp--flip.mdp--closing {
+/* Suppress fallback CSS animations when JS FLIP is running */
+.mdp.mdp--flip .mdp-body,
+.mdp.mdp--flip.mdp--closing .mdp-body {
   animation: none;
 }
 .mdp.mdp--flip .mdp-hero-bg {
@@ -1919,19 +1955,6 @@ input  { font-family: inherit; }
 }
 .mdp.mdp--flip .mdp-content {
   animation: none;
-  will-change: transform, opacity;
-}
-.mdp.mdp--flip .mdp-hero {
-  will-change: transform;
-  overflow: visible;
-}
-
-/* Hero */
-.mdp-hero {
-  width: 100%;
-  height: clamp(300px, 54vh, 640px);
-  position: relative;
-  overflow: hidden;
 }
 
 .mdp-hero-bg {
@@ -1939,7 +1962,7 @@ input  { font-family: inherit; }
   inset: 0;
   background-size: cover;
   background-position: center;
-  animation: mdp-hero-enter 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  /* no animation — hero expansion is handled by JS FLIP on the parent */
 }
 
 .mdp-hero-glow {
@@ -1986,7 +2009,6 @@ input  { font-family: inherit; }
   padding: 0 2rem 5rem;
   position: relative;
   z-index: 1;
-  animation: mdp-content-up 0.5s 0.14s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .mdp-content-main {
