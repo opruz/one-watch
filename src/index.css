@@ -901,8 +901,8 @@ input  { font-family: inherit; }
   background:
     linear-gradient(
       to right,
-      rgba(0,0,0,0.95) 0%,
-      rgba(0,0,0,0.90) 35%,
+      rgba(0,0,0,0.80) 0%,
+      rgba(0,0,0,0.76) 35%,
       rgba(0,0,0,0.65) 55%,
       rgba(0,0,0,0.10) 72%,
       transparent 75%
