@@ -163,7 +163,7 @@ export default function FocusMode() {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    setView("r");
+    setView("r");          /* slide overlay up immediately — shows skeleton during load */
     setDetailPick(null);
     try {
       const platforms = getPlatforms();
@@ -204,83 +204,78 @@ export default function FocusMode() {
 
   return (
     <div className="fm-page">
-      <div className={`fm-views${view === "r" ? " fm-views--r" : ""}`}>
 
-        {/* ── Questionnaire pane ── */}
-        <div className="fm-view fm-view--q">
-          <div className="fm-wrap">
-            <div className="fm-questionnaire">
-              <div className="fm-intro">
-                <p className="fm-intro-eyebrow"><Crosshair size={14} weight="duotone" /> Focus Mode</p>
-                <h2 className="fm-intro-title">What are you in the mood for?</h2>
-                <p className="fm-intro-hint">Everything defaults to Any — just hit the button.</p>
+      {/* ── Questionnaire — normal doc flow, scrolls with .main ── */}
+      <div className="fm-wrap">
+        <div className="fm-questionnaire">
+          <div className="fm-intro">
+            <p className="fm-intro-eyebrow"><Crosshair size={14} weight="duotone" /> Focus Mode</p>
+            <h2 className="fm-intro-title">What are you in the mood for?</h2>
+            <p className="fm-intro-hint">Everything defaults to Any — just hit the button.</p>
+          </div>
+
+          <QSection label="Who's watching?">
+            <OptionGrid options={AUDIENCE_OPTIONS} selected={answers.audience} onSelect={(v) => set("audience", v)} />
+          </QSection>
+          <QSection label="What's your mood?">
+            <OptionGrid options={MOOD_OPTIONS} selected={answers.mood} onSelect={(v) => set("mood", v)} />
+          </QSection>
+          <QSection label="How much time?">
+            <OptionGrid options={TIME_OPTIONS} selected={answers.time} onSelect={(v) => set("time", v)} />
+          </QSection>
+          <QSection label="Anything to avoid?">
+            <div className="fm-avoid-chips">
+              {AVOID_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`fm-avoid-chip${answers.avoid.includes(opt.value) ? " fm-avoid-chip--on" : ""}`}
+                  onClick={() => toggleAvoid(opt.value)}
+                >
+                  {answers.avoid.includes(opt.value) && <X size={11} weight="bold" />}
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </QSection>
+
+          <button type="button" className="fm-cta" onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? <span className="fm-spinner" /> : "Find something to watch"}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Results overlay — position:fixed, slides up over questionnaire ── */}
+      <div className={`fm-results-overlay${view === "r" ? " fm-results-overlay--in" : ""}`}>
+        {isLoading ? (
+          <div className="fm-gallery-skeleton" />
+        ) : (
+          <>
+            <div className="fm-gallery-header">
+              <div>
+                <p className="fm-results-label">Your picks</p>
+                <p className="fm-results-sub">{activeIdx + 1} of {picks.length} · tap active card for details</p>
               </div>
-
-              <QSection label="Who's watching?">
-                <OptionGrid options={AUDIENCE_OPTIONS} selected={answers.audience} onSelect={(v) => set("audience", v)} />
-              </QSection>
-              <QSection label="What's your mood?">
-                <OptionGrid options={MOOD_OPTIONS} selected={answers.mood} onSelect={(v) => set("mood", v)} />
-              </QSection>
-              <QSection label="How much time?">
-                <OptionGrid options={TIME_OPTIONS} selected={answers.time} onSelect={(v) => set("time", v)} />
-              </QSection>
-              <QSection label="Anything to avoid?">
-                <div className="fm-avoid-chips">
-                  {AVOID_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      className={`fm-avoid-chip${answers.avoid.includes(opt.value) ? " fm-avoid-chip--on" : ""}`}
-                      onClick={() => toggleAvoid(opt.value)}
-                    >
-                      {answers.avoid.includes(opt.value) && <X size={11} weight="bold" />}
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </QSection>
-
-              <button type="button" className="fm-cta" onClick={handleSubmit} disabled={isLoading}>
-                {isLoading ? <span className="fm-spinner" /> : "Find something to watch"}
+              <button type="button" className="fm-change-answers-btn" onClick={() => setView("q")}>
+                ↓ Change your answers
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* ── Results pane ── */}
-        <div className="fm-view fm-view--r">
-          {isLoading ? (
-            <div className="fm-gallery-skeleton" />
-          ) : (
-            <>
-              <div className="fm-gallery-header">
-                <div>
-                  <p className="fm-results-label">Your picks</p>
-                  <p className="fm-results-sub">{activeIdx + 1} of {picks.length} · tap active card for details</p>
-                </div>
-                <button type="button" className="fm-change-answers-btn" onClick={() => setView("q")}>
-                  ← Change your answers
-                </button>
-              </div>
-              <div className="fm-gallery">
-                {picks.map((pick, i) => (
-                  <GalleryCard
-                    key={pick.id}
-                    pick={pick}
-                    offset={i - activeIdx}
-                    isActive={i === activeIdx}
-                    onClick={(rect) => {
-                      if (i === activeIdx) { setDetailPick(pick); setFromRect(rect); }
-                      else setActiveIdx(i);
-                    }}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
+            <div className="fm-gallery">
+              {picks.map((pick, i) => (
+                <GalleryCard
+                  key={pick.id}
+                  pick={pick}
+                  offset={i - activeIdx}
+                  isActive={i === activeIdx}
+                  onClick={(rect) => {
+                    if (i === activeIdx) { setDetailPick(pick); setFromRect(rect); }
+                    else setActiveIdx(i);
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {(detailPick || isClosingDetail) && detailPick && (
