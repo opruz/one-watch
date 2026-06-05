@@ -224,6 +224,7 @@ input  { font-family: inherit; }
 
 /* ===== MAIN ===== */
 .main {
+  grid-column: 2;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -666,7 +667,7 @@ input  { font-family: inherit; }
 /* ===== FOCUS MODE ===== */
 .fm-wrap {
   padding: 1.4rem 1.4rem 3rem;
-  max-width: 680px;
+  max-width: 900px;
   margin: 0 auto;
   width: 100%;
   display: flex;
@@ -1108,6 +1109,9 @@ input  { font-family: inherit; }
   display: flex;
   flex-direction: column;
   gap: 1.3rem;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* ── Hero ── */
