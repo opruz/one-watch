@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Crosshair, FilmStrip, Television, X, Bookmark,
   Star, User, Heart, Users, UsersThree,
   Coffee, Lightning, Drop, Sparkle, Smiley,
-  Clock, Moon, ArrowsClockwise,
+  Clock, Moon,
 } from "@phosphor-icons/react";
 import { getRecommendations, getOneRecommendation } from "../../lib/claude";
 import {
@@ -24,7 +24,6 @@ interface Answers {
 
 const DEFAULT: Answers = { audience: "any", mood: "any", time: "any", avoid: [] };
 
-/* ── Icon helpers ── */
 type PhWeight = "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
 type PhIconComp = React.ComponentType<{ size?: number; weight?: PhWeight; color?: string }>;
 
@@ -34,22 +33,13 @@ const ICON_MAP: Record<string, PhIconComp> = {
   Clock, Moon,
 };
 
-function QIcon({ name, size = 16, weight = "duotone" }: {
-  name: string;
-  size?: number;
-  weight?: PhWeight;
-}) {
+function QIcon({ name, size = 16, weight = "duotone" }: { name: string; size?: number; weight?: PhWeight }) {
   const Ic = ICON_MAP[name] as PhIconComp | undefined;
   if (!Ic) return null;
   return <Ic size={size} weight={weight} />;
 }
 
-/* ── Small sub-components ── */
-function OptionGrid({
-  options,
-  selected,
-  onSelect,
-}: {
+function OptionGrid({ options, selected, onSelect }: {
   options: { value: string; label: string; icon?: string }[];
   selected: string;
   onSelect: (v: string) => void;
@@ -65,11 +55,7 @@ function OptionGrid({
         >
           {opt.icon && (
             <span className="fm-opt-icon">
-              <QIcon
-                name={opt.icon}
-                size={16}
-                weight={selected === opt.value ? "fill" : "duotone"}
-              />
+              <QIcon name={opt.icon} size={16} weight={selected === opt.value ? "fill" : "duotone"} />
             </span>
           )}
           <span className="fm-opt-label">{opt.label}</span>
@@ -89,27 +75,15 @@ function QSection({ label, children }: { label: string; children: React.ReactNod
 }
 
 /* ── Expanded Detail Sheet ── */
-function ExpandedSheet({
-  pick, onClose, saved, onSave, onRefresh,
-}: {
-  pick: FocusPick;
-  onClose: () => void;
-  saved: boolean;
-  onSave: () => void;
-  onRefresh: () => void;
+function ExpandedSheet({ pick, onClose, saved, onSave, onRefresh }: {
+  pick: FocusPick; onClose: () => void; saved: boolean; onSave: () => void; onRefresh: () => void;
 }) {
   return (
     <div className="fm-overlay" onClick={onClose} role="presentation">
-      <div
-        className="fm-sheet"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
+      <div className="fm-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <button type="button" className="fm-close" onClick={onClose} aria-label="Close">
           <X size={18} weight="bold" />
         </button>
-
         <div className="fm-sheet-poster" style={{ background: pick.posterGradient }}>
           <div className="fm-poster-glow" style={{ background: pick.posterGlow }} />
           <div className="fm-poster-grain" />
@@ -122,14 +96,11 @@ function ExpandedSheet({
             </p>
             <h2 className="fm-sheet-poster-title">{pick.title}</h2>
             <div className="fm-sheet-poster-tags">
-              {pick.mood_tags.map((tag) => (
-                <span key={tag} className="fm-tag">{tag}</span>
-              ))}
+              {pick.mood_tags.map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
             </div>
           </div>
           <div className="fm-poster-score">★ {pick.imdb_score}</div>
         </div>
-
         <div className="fm-sheet-body">
           <div className="fm-sheet-meta">
             <span>{pick.year}</span>
@@ -158,9 +129,7 @@ function ExpandedSheet({
 }
 
 /* ── Gallery Card ── */
-function GalleryCard({
-  pick, offset, isActive, onClick,
-}: {
+function GalleryCard({ pick, offset, isActive, onClick }: {
   pick: FocusPick; offset: number; isActive: boolean; onClick: () => void;
 }) {
   const abs     = Math.abs(offset);
@@ -172,10 +141,7 @@ function GalleryCard({
   return (
     <div
       className="fm-gallery-slot"
-      style={{
-        transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`,
-        zIndex: 10 - abs,
-      }}
+      style={{ transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`, zIndex: 10 - abs }}
       onClick={onClick}
     >
       <div
@@ -194,15 +160,11 @@ function GalleryCard({
         <div className="fm-gallery-overlay">
           <div className="fm-gallery-top">
             <span className="fm-gallery-score">★ {pick.imdb_score}</span>
-            <span className="fm-gallery-platform" style={{ color: pick.platformColor }}>
-              {pick.platform}
-            </span>
+            <span className="fm-gallery-platform" style={{ color: pick.platformColor }}>{pick.platform}</span>
           </div>
           <div className="fm-gallery-bottom">
             <div className="fm-gallery-tags">
-              {pick.mood_tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="fm-tag">{tag}</span>
-              ))}
+              {pick.mood_tags.slice(0, 3).map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
             </div>
             <h3 className="fm-gallery-title">{pick.title}</h3>
             <p className="fm-gallery-meta">{pick.year} · {pick.runtime}</p>
@@ -214,14 +176,17 @@ function GalleryCard({
   );
 }
 
-/* ── Main FocusMode component ── */
+/* ── Main ── */
 export default function FocusMode() {
-  const [answers, setAnswers] = useState<Answers>(DEFAULT);
-  const [isLoading, setIsLoading] = useState(false);
-  const [picks, setPicks] = useState<FocusPick[]>(FOCUS_PICKS);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [expanded, setExpanded] = useState<FocusPick | null>(null);
-  const [saved, setSaved] = useState<string[]>([]);
+  const [answers, setAnswers]       = useState<Answers>(DEFAULT);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isLoading, setIsLoading]   = useState(false);
+  const [picks, setPicks]           = useState<FocusPick[]>(FOCUS_PICKS);
+  const [activeIdx, setActiveIdx]   = useState(0);
+  const [expanded, setExpanded]     = useState<FocusPick | null>(null);
+  const [saved, setSaved]           = useState<string[]>([]);
+  const questionnaireRef            = useRef<HTMLDivElement>(null);
+  const resultsRef                  = useRef<HTMLDivElement>(null);
 
   const set = (field: keyof Answers, value: string | string[]) =>
     setAnswers((prev) => ({ ...prev, [field]: value }));
@@ -233,22 +198,30 @@ export default function FocusMode() {
     set("avoid", next);
   };
 
+  useEffect(() => {
+    if (hasSearched && !isLoading) {
+      setActiveIdx(0);
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [hasSearched, isLoading]);
+
   const getPlatforms = (): string[] => {
     try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
     catch { return []; }
   };
 
-  const handleRefresh = async () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
+    setHasSearched(false);
     try {
       const platforms = getPlatforms();
       const recs = await getRecommendations(platforms.length ? platforms : ["Netflix", "Prime", "Hulu"], answers);
       setPicks(recs);
-      setActiveIdx(0);
     } catch {
       setPicks(FOCUS_PICKS);
     }
     setIsLoading(false);
+    setHasSearched(true);
   };
 
   const handleRefreshCard = async (pick: FocusPick) => {
@@ -261,94 +234,36 @@ export default function FocusMode() {
         avoidTitles,
       );
       setPicks((prev) => prev.map((p) => (p.id === pick.id ? newPick : p)));
-    } catch {
-      // silently keep the existing card
-    }
+    } catch { /* silently keep existing */ }
   };
 
-  const toggleSave = (pick: FocusPick) => {
-    setSaved((prev) =>
-      prev.includes(pick.id) ? prev.filter((id) => id !== pick.id) : [...prev, pick.id]
-    );
-  };
+  const toggleSave = (pick: FocusPick) =>
+    setSaved((prev) => prev.includes(pick.id) ? prev.filter((id) => id !== pick.id) : [...prev, pick.id]);
+
+  const scrollToQuestionnaire = () =>
+    questionnaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <div className="fm-page">
-      {/* Hint */}
-      <p className="fm-page-hint">← → Browse suggestions · ↓ Adjust your preferences below</p>
 
-      {/* Gallery — full width */}
-      <div className="fm-gallery-section">
-        <div className="fm-gallery-header">
-          <div>
-            <p className="fm-results-label">
-              <Crosshair size={12} weight="duotone" /> Tonight's picks
-            </p>
-            <p className="fm-results-sub">{activeIdx + 1} of {picks.length} — tap active card for details</p>
-          </div>
-          <button
-            type="button"
-            className="fm-refresh-btn"
-            onClick={handleRefresh}
-            disabled={isLoading}
-          >
-            {isLoading
-              ? <span className="fm-spinner fm-spinner--sm" />
-              : <><ArrowsClockwise size={13} weight="bold" /> Refresh</>
-            }
-          </button>
-        </div>
-
-        <div className="fm-gallery">
-          {picks.map((pick, i) => (
-            <GalleryCard
-              key={pick.id}
-              pick={pick}
-              offset={i - activeIdx}
-              isActive={i === activeIdx}
-              onClick={() => {
-                if (i === activeIdx) setExpanded(pick);
-                else setActiveIdx(i);
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Questionnaire — constrained width, below gallery */}
-      <div className="fm-wrap">
+      {/* ── Questionnaire ── */}
+      <div className="fm-wrap" ref={questionnaireRef}>
         <div className="fm-questionnaire">
           <div className="fm-intro">
-            <h2 className="fm-intro-title">Adjust your preferences</h2>
-            <p className="fm-intro-hint">
-              Change any filter and hit refresh above.
-            </p>
+            <p className="fm-intro-eyebrow"><Crosshair size={14} weight="duotone" /> Focus Mode</p>
+            <h2 className="fm-intro-title">What are you in the mood for?</h2>
+            <p className="fm-intro-hint">Everything defaults to Any — just hit the button.</p>
           </div>
 
           <QSection label="Who's watching?">
-            <OptionGrid
-              options={AUDIENCE_OPTIONS}
-              selected={answers.audience}
-              onSelect={(v) => set("audience", v)}
-            />
+            <OptionGrid options={AUDIENCE_OPTIONS} selected={answers.audience} onSelect={(v) => set("audience", v)} />
           </QSection>
-
           <QSection label="What's your mood?">
-            <OptionGrid
-              options={MOOD_OPTIONS}
-              selected={answers.mood}
-              onSelect={(v) => set("mood", v)}
-            />
+            <OptionGrid options={MOOD_OPTIONS} selected={answers.mood} onSelect={(v) => set("mood", v)} />
           </QSection>
-
           <QSection label="How much time?">
-            <OptionGrid
-              options={TIME_OPTIONS}
-              selected={answers.time}
-              onSelect={(v) => set("time", v)}
-            />
+            <OptionGrid options={TIME_OPTIONS} selected={answers.time} onSelect={(v) => set("time", v)} />
           </QSection>
-
           <QSection label="Anything to avoid?">
             <div className="fm-avoid-chips">
               {AVOID_OPTIONS.map((opt) => (
@@ -364,8 +279,45 @@ export default function FocusMode() {
               ))}
             </div>
           </QSection>
+
+          <button type="button" className="fm-cta" onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? <span className="fm-spinner" /> : "Find something to watch"}
+          </button>
         </div>
       </div>
+
+      {/* ── Loading skeleton ── */}
+      {isLoading && (
+        <div className="fm-gallery-section fm-gallery-section--loading">
+          <div className="fm-gallery-skeleton" />
+        </div>
+      )}
+
+      {/* ── Results gallery ── */}
+      {hasSearched && !isLoading && (
+        <div ref={resultsRef} className="fm-gallery-section">
+          <div className="fm-gallery-header">
+            <div>
+              <p className="fm-results-label">Your picks</p>
+              <p className="fm-results-sub">{activeIdx + 1} of {picks.length} · tap active card for details</p>
+            </div>
+            <button type="button" className="fm-change-answers-btn" onClick={scrollToQuestionnaire}>
+              ↑ Change your answers
+            </button>
+          </div>
+          <div className="fm-gallery">
+            {picks.map((pick, i) => (
+              <GalleryCard
+                key={pick.id}
+                pick={pick}
+                offset={i - activeIdx}
+                isActive={i === activeIdx}
+                onClick={() => { if (i === activeIdx) setExpanded(pick); else setActiveIdx(i); }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {expanded && (
         <ExpandedSheet
