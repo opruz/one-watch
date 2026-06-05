@@ -76,11 +76,8 @@ export default function AccountIntegrationModal({ platforms, onContinue }: Props
         </ul>
 
         <div className="aim-footer">
-          <button type="button" className="aim-cta" onClick={onContinue}>
-            {connected.length > 0 ? "Continue" : "Get started"}
-          </button>
           <button type="button" className="aim-skip" onClick={onContinue}>
-            Connect later
+            {connected.length > 0 ? "Done" : "Connect later"}
           </button>
         </div>
       </div>

@@ -598,11 +598,9 @@ input  { font-family: inherit; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .aim-footer {
-  padding: 1.25rem 1.75rem 1.5rem;
+  padding: 1.1rem 1.75rem 1.5rem;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.65rem;
+  justify-content: center;
 }
 .aim-cta {
   width: 100%;
