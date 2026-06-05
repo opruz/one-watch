@@ -13,73 +13,88 @@ interface Props {
 }
 
 const EASE = "cubic-bezier(0.4,0,0.2,1)";
-const DUR  = 420;
+const DUR  = 480;
+const BG   = "#080810";
 
 export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSave, onRefresh, onClose }: Props) {
+  const mdpRef     = useRef<HTMLDivElement>(null);
   const heroRef    = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const animRef    = useRef<{ heroFrom: string; contentFrom: string } | null>(null);
 
   /* ── Entry FLIP ── */
   useLayoutEffect(() => {
-    if (!fromRect || !heroRef.current || !contentRef.current) return;
-
+    const mdpEl     = mdpRef.current;
     const heroEl    = heroRef.current;
     const contentEl = contentRef.current;
-    const heroRect  = heroEl.getBoundingClientRect();
+    if (!fromRect || !mdpEl || !heroEl || !contentEl) return;
 
-    /* Scale/translate hero from card poster rect → hero rect */
+    const heroRect    = heroEl.getBoundingClientRect();
+    const contentTop  = contentEl.getBoundingClientRect().top;
+
+    /* Hero: scale + translate from card poster → full hero */
     const sx = fromRect.width  / heroRect.width;
     const sy = fromRect.height / heroRect.height;
     const tx = fromRect.left   - heroRect.left;
     const ty = fromRect.top    - heroRect.top;
 
     const heroFrom    = `translate(${tx}px,${ty}px) scale(${sx},${sy})`;
-    const contentFrom = `translateY(${fromRect.top + fromRect.height * 0.5 - contentEl.getBoundingClientRect().top}px)`;
+    /* Content: slide from just below the card's bottom edge */
+    const contentFrom = `translateY(${fromRect.bottom - contentTop}px)`;
 
     animRef.current = { heroFrom, contentFrom };
 
-    /* Set starting position instantly */
-    heroEl.style.transformOrigin    = "0 0";
-    heroEl.style.transform          = heroFrom;
-    heroEl.style.opacity            = "0.85";
-    contentEl.style.transform       = contentFrom;
-    contentEl.style.opacity         = "0";
-    contentEl.style.transition      = "none";
+    /* ── Instantly set starting state (before paint) ── */
+    mdpEl.style.overflow         = "visible";   /* prevent scroll container from clipping the hero during FLIP */
+    mdpEl.style.backgroundColor  = "transparent";
+    heroEl.style.transition      = "none";
+    heroEl.style.transformOrigin = "0 0";
+    heroEl.style.transform       = heroFrom;
+    contentEl.style.transition   = "none";
+    contentEl.style.transform    = contentFrom;
+    contentEl.style.opacity      = "0";
 
+    /* ── Animate to final state ── */
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      heroEl.style.transition    = `transform ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}`;
-      contentEl.style.transition = `transform ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}`;
-
-      heroEl.style.transform    = "translate(0,0) scale(1,1)";
-      heroEl.style.opacity      = "1";
-      contentEl.style.transform = "translateY(0)";
-      contentEl.style.opacity   = "1";
+      mdpEl.style.transition   = `background-color ${DUR}ms ${EASE}`;
+      mdpEl.style.backgroundColor = BG;
+      heroEl.style.transition  = `transform ${DUR}ms ${EASE}`;
+      heroEl.style.transform   = "none";
+      contentEl.style.transition = `transform ${DUR}ms ${EASE}, opacity ${Math.round(DUR * 0.65)}ms ${EASE}`;
+      contentEl.style.transform = "none";
+      contentEl.style.opacity  = "1";
+      /* restore scroll after animation completes */
+      setTimeout(() => { mdpEl.style.overflow = ""; }, DUR + 80);
     }));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Exit FLIP ── */
   useEffect(() => {
-    if (!isClosing || !animRef.current || !heroRef.current || !contentRef.current) return;
-
+    const mdpEl     = mdpRef.current;
     const heroEl    = heroRef.current;
     const contentEl = contentRef.current;
+    if (!isClosing || !animRef.current || !mdpEl || !heroEl || !contentEl) return;
+
     const { heroFrom, contentFrom } = animRef.current;
+    const dur = DUR - 40;
 
-    heroEl.style.transition    = `transform ${DUR - 30}ms ${EASE}, opacity ${DUR - 30}ms ${EASE}`;
-    contentEl.style.transition = `transform ${DUR - 30}ms ${EASE}, opacity ${DUR - 30}ms ${EASE}`;
-
-    heroEl.style.transform    = heroFrom;
-    heroEl.style.opacity      = "0.85";
+    mdpEl.style.overflow     = "visible";
+    mdpEl.style.transition   = `background-color ${dur}ms ${EASE}`;
+    mdpEl.style.backgroundColor = "transparent";
+    heroEl.style.transition  = `transform ${dur}ms ${EASE}`;
+    heroEl.style.transform   = heroFrom;
+    contentEl.style.transition = `transform ${dur}ms ${EASE}, opacity ${Math.round(dur * 0.6)}ms ${EASE}`;
     contentEl.style.transform = contentFrom;
-    contentEl.style.opacity   = "0";
+    contentEl.style.opacity  = "0";
   }, [isClosing]);
 
   const useFlip = !!fromRect;
 
   return (
-    <div className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}>
-
+    <div
+      ref={mdpRef}
+      className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}
+    >
       {/* Hero */}
       <div className="mdp-hero" ref={heroRef}>
         {pick.thumbnailUrl ? (

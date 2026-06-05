@@ -1909,23 +1909,21 @@ input  { font-family: inherit; }
 }
 
 /* Suppress CSS animations when FLIP JS animation is active */
-.mdp--flip,
-.mdp--flip.mdp--closing {
+/* Use double-class for higher specificity than .mdp / .mdp--closing */
+.mdp.mdp--flip,
+.mdp.mdp--flip.mdp--closing {
   animation: none;
 }
-.mdp--flip .mdp-hero-bg,
-.mdp--flip .mdp--closing .mdp-hero-bg {
+.mdp.mdp--flip .mdp-hero-bg {
   animation: none;
 }
-.mdp--flip .mdp-content {
+.mdp.mdp--flip .mdp-content {
   animation: none;
-}
-.mdp--flip .mdp-hero {
-  overflow: visible;
-  will-change: transform;
-}
-.mdp--flip .mdp-content {
   will-change: transform, opacity;
+}
+.mdp.mdp--flip .mdp-hero {
+  will-change: transform;
+  overflow: visible;
 }
 
 /* Hero */
