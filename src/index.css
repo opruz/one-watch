@@ -1909,14 +1909,23 @@ input  { font-family: inherit; }
 
 .mdp--closing { pointer-events: none; }
 
-/* Hero — position: fixed so FLIP transforms are never clipped by a scroll container */
+/* Flying card portal — same image as gallery card, animates from card→hero then crossfades */
+.mdp-fly {
+  position: fixed;
+  z-index: 202;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+
+/* Hero — position: fixed so it is never clipped by a scroll container */
 .mdp-hero {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: clamp(300px, 54vh, 640px);
   z-index: 201;
   overflow: hidden;
-  will-change: transform, clip-path;
+  will-change: opacity;
 }
 
 /* Body — scrollable page content, sits behind the hero */

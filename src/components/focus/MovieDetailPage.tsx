@@ -19,81 +19,117 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
   const heroRef    = useRef<HTMLDivElement>(null);
   const bodyRef    = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  /* stores entry values so exit can reverse them */
-  const fromRef = useRef<{ tx: number; ty: number; clip: string } | null>(null);
+  const flyRef     = useRef<HTMLDivElement>(null);
+  const savedRect  = useRef<DOMRect | null>(null);
 
-  /* ── Entry FLIP ── */
+  /* ── Entry ── */
   useLayoutEffect(() => {
-    const heroEl    = heroRef.current;
+    const flyEl     = flyRef.current;
     const bodyEl    = bodyRef.current;
     const contentEl = contentRef.current;
-    if (!fromRect || !heroEl || !bodyEl || !contentEl) return;
+    const heroEl    = heroRef.current;
+    if (!fromRect || !flyEl || !bodyEl || !contentEl || !heroEl) return;
 
-    const heroRect = heroEl.getBoundingClientRect();
+    savedRect.current = fromRect;
+    const { width: heroW, height: heroH } = heroEl.getBoundingClientRect();
 
-    /*
-     * Translate-only (no scale): shift the full-size hero so its bottom aligns
-     * with the card's bottom and its horizontal center aligns with the card center.
-     * clip-path then reveals only the card-sized window; both animate to their
-     * natural states so the image grows from the card outward without distortion.
-     */
-    const tx = (fromRect.left + fromRect.width * 0.5) - heroRect.width * 0.5;
-    const ty = fromRect.bottom - heroRect.height;
+    /* Flying element starts exactly where the card poster is */
+    flyEl.style.transition   = "none";
+    flyEl.style.top          = `${fromRect.top}px`;
+    flyEl.style.left         = `${fromRect.left}px`;
+    flyEl.style.width        = `${fromRect.width}px`;
+    flyEl.style.height       = `${fromRect.height}px`;
+    flyEl.style.borderRadius = "16px";
+    flyEl.style.opacity      = "1";
 
-    /* Horizontal clip: hide the hero outside the card's width (in element space) */
-    const hClip = Math.max(0, heroRect.width * 0.5 - fromRect.width * 0.5);
-
-    /* Vertical top clip: if the hero is taller than the card, clip from the top
-       so the visible window starts at the card's top (in element space).
-       If the card is taller than the hero, no top clip is needed (vClip = 0). */
-    const vClip = Math.max(0, heroRect.height - fromRect.height);
-
-    const CARD_RADIUS = 16; /* match var(--r) */
-    const fromClip = `inset(${vClip}px ${hClip}px 0px ${hClip}px round ${CARD_RADIUS}px)`;
-
-    fromRef.current = { tx, ty, clip: fromClip };
-
-    /* Instant "first" state — runs before browser paints */
+    /* Real hero hidden until fly completes */
     heroEl.style.transition = "none";
-    heroEl.style.transform  = `translate(${tx}px,${ty}px)`;
-    heroEl.style.clipPath   = fromClip;
-    bodyEl.style.transition = "none";
-    bodyEl.style.opacity    = "0";
+    heroEl.style.opacity    = "0";
+
+    /* Body fades in alongside the fly; content waits */
+    bodyEl.style.transition  = "none";
+    bodyEl.style.opacity     = "0";
     contentEl.style.transition = "none";
     contentEl.style.opacity  = "0";
-    contentEl.style.transform = "translateY(-48px)";
+    contentEl.style.transform = "translateY(-32px)";
 
-    /* Animate to final state after first paint */
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      heroEl.style.transition = `transform ${DUR}ms ${EASE}, clip-path ${DUR}ms ${EASE}`;
-      heroEl.style.transform  = "none";
-      heroEl.style.clipPath   = "inset(0px 0px 0px 0px round 0px)";
-      bodyEl.style.transition  = `opacity ${DUR}ms ${EASE}`;
-      bodyEl.style.opacity     = "1";
-      const delay = Math.round(DUR * 0.2);
-      contentEl.style.transition = `opacity ${Math.round(DUR * 0.7)}ms ${EASE} ${delay}ms, transform ${DUR}ms ${EASE} ${delay}ms`;
-      contentEl.style.opacity  = "1";
-      contentEl.style.transform = "none";
+      /* Fly from card → hero bounds */
+      flyEl.style.transition = [
+        `top ${DUR}ms ${EASE}`,
+        `left ${DUR}ms ${EASE}`,
+        `width ${DUR}ms ${EASE}`,
+        `height ${DUR}ms ${EASE}`,
+        `border-radius ${DUR}ms ${EASE}`,
+      ].join(", ");
+      flyEl.style.top          = "0";
+      flyEl.style.left         = "0";
+      flyEl.style.width        = `${heroW}px`;
+      flyEl.style.height       = `${heroH}px`;
+      flyEl.style.borderRadius = "0";
+
+      bodyEl.style.transition = `opacity ${DUR}ms ${EASE}`;
+      bodyEl.style.opacity    = "1";
+
+      /* Once fly reaches hero: crossfade fly→hero, reveal content */
+      setTimeout(() => {
+        flyEl.style.transition = "opacity 150ms ease";
+        flyEl.style.opacity    = "0";
+
+        heroEl.style.transition = "opacity 150ms ease";
+        heroEl.style.opacity    = "1";
+
+        contentEl.style.transition = `opacity 300ms ease 30ms, transform 400ms ${EASE} 30ms`;
+        contentEl.style.opacity    = "1";
+        contentEl.style.transform  = "none";
+      }, DUR + 20);
     }));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Exit FLIP ── */
+  /* ── Exit ── */
   useEffect(() => {
-    const heroEl    = heroRef.current;
+    const flyEl     = flyRef.current;
     const bodyEl    = bodyRef.current;
     const contentEl = contentRef.current;
-    if (!isClosing || !fromRef.current || !heroEl || !bodyEl || !contentEl) return;
+    const heroEl    = heroRef.current;
+    if (!isClosing || !savedRect.current || !flyEl || !bodyEl || !contentEl || !heroEl) return;
 
-    const { tx, ty, clip } = fromRef.current;
-    const dur = DUR - 50;
+    const from     = savedRect.current;
+    const heroRect = heroEl.getBoundingClientRect();
+    const dur      = DUR - 50;
 
-    heroEl.style.transition = `transform ${dur}ms ${EASE}, clip-path ${dur}ms ${EASE}`;
-    heroEl.style.transform  = `translate(${tx}px,${ty}px)`;
-    heroEl.style.clipPath   = clip;
-    bodyEl.style.transition  = `opacity ${dur}ms ${EASE}`;
-    bodyEl.style.opacity     = "0";
-    contentEl.style.transition = `opacity ${Math.round(dur * 0.5)}ms ${EASE}`;
-    contentEl.style.opacity  = "0";
+    /* Snap fly to hero position, hide real hero */
+    flyEl.style.transition   = "none";
+    flyEl.style.top          = "0";
+    flyEl.style.left         = "0";
+    flyEl.style.width        = `${heroRect.width}px`;
+    flyEl.style.height       = `${heroRect.height}px`;
+    flyEl.style.borderRadius = "0";
+    flyEl.style.opacity      = "1";
+
+    heroEl.style.transition = "none";
+    heroEl.style.opacity    = "0";
+
+    contentEl.style.transition = `opacity ${Math.round(dur * 0.4)}ms ease`;
+    contentEl.style.opacity    = "0";
+    bodyEl.style.transition    = `opacity ${dur}ms ${EASE}`;
+    bodyEl.style.opacity       = "0";
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      /* Fly back to card position */
+      flyEl.style.transition = [
+        `top ${dur}ms ${EASE}`,
+        `left ${dur}ms ${EASE}`,
+        `width ${dur}ms ${EASE}`,
+        `height ${dur}ms ${EASE}`,
+        `border-radius ${dur}ms ${EASE}`,
+      ].join(", ");
+      flyEl.style.top          = `${from.top}px`;
+      flyEl.style.left         = `${from.left}px`;
+      flyEl.style.width        = `${from.width}px`;
+      flyEl.style.height       = `${from.height}px`;
+      flyEl.style.borderRadius = "16px";
+    }));
   }, [isClosing]);
 
   const useFlip = !!fromRect;
@@ -101,7 +137,19 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
   return (
     <div className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}>
 
-      {/* Hero — position: fixed, so FLIP transforms are never clipped */}
+      {/* Flying card — same image/gradient as gallery card; expands from card→hero then crossfades */}
+      {useFlip && (
+        <div
+          className="mdp-fly"
+          ref={flyRef}
+          style={pick.thumbnailUrl
+            ? { backgroundImage: `url(${pick.thumbnailUrl})` }
+            : { background: pick.posterGradient }
+          }
+        />
+      )}
+
+      {/* Hero */}
       <div className="mdp-hero" ref={heroRef}>
         {pick.thumbnailUrl ? (
           <div className="mdp-hero-bg" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }} />
@@ -117,7 +165,7 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
         </button>
       </div>
 
-      {/* Body — scrollable, sits behind the hero, fades in during FLIP */}
+      {/* Body */}
       <div className="mdp-body" ref={bodyRef}>
         <div className="mdp-content" ref={contentRef}>
           <div className="mdp-content-main">
