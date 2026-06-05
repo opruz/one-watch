@@ -189,11 +189,21 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
           opacity,
         }}
       >
-        <div className="fm-gallery-bg" style={{ background: pick.posterGradient }}>
-          <div className="fm-gallery-glow" style={{ background: pick.posterGlow }} />
-          <div className="fm-poster-grain" />
-          <div className="fm-gallery-scrim" />
-        </div>
+        {pick.thumbnailUrl ? (
+          <div
+            className="fm-gallery-bg fm-gallery-bg--photo"
+            style={{ backgroundImage: `url(${pick.thumbnailUrl})` }}
+          >
+            <div className="fm-poster-grain" />
+            <div className="fm-gallery-scrim fm-gallery-scrim--photo" />
+          </div>
+        ) : (
+          <div className="fm-gallery-bg" style={{ background: pick.posterGradient }}>
+            <div className="fm-gallery-glow" style={{ background: pick.posterGlow }} />
+            <div className="fm-poster-grain" />
+            <div className="fm-gallery-scrim" />
+          </div>
+        )}
         <div className="fm-gallery-overlay">
           <div className="fm-gallery-top">
             <span className="fm-gallery-score">★ {pick.imdb_score}</span>
@@ -203,7 +213,11 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
             <div className="fm-gallery-tags">
               {pick.mood_tags.slice(0, 3).map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
             </div>
-            <h3 className="fm-gallery-title">{pick.title}</h3>
+            {pick.logoUrl ? (
+              <img src={pick.logoUrl} alt={pick.title} className="fm-gallery-logo" draggable={false} />
+            ) : (
+              <h3 className="fm-gallery-title">{pick.title}</h3>
+            )}
             <p className="fm-gallery-meta">{pick.year} · {pick.runtime}</p>
           </div>
         </div>

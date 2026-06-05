@@ -10,14 +10,35 @@ export interface FocusPick {
   imdb_score: number;
   description: string;
   why_this: string;
-  /** Rich multi-stop gradient — our "AI-generated" cinematic poster */
   posterGradient: string;
-  /** Subtle inner glow layer on top of the gradient */
   posterGlow: string;
+  thumbnailUrl?: string;
+  logoUrl?: string;
 }
 
 /** Dummy picks — always shown in Focus mode (no API key required) */
 export const FOCUS_PICKS: FocusPick[] = [
+  {
+    id: "f0",
+    title: "Knives Out",
+    year: 2019,
+    type: "movie",
+    platform: "Netflix",
+    platformColor: "#E50914",
+    mood_tags: ["Tense & gripping", "Something funny"],
+    runtime: "2h 10m",
+    imdb_score: 7.9,
+    description:
+      "When renowned crime novelist Harlan Thrombey is found dead after his 85th birthday party, detective Benoit Blanc is mysteriously enlisted to investigate. A sharp, witty whodunit that keeps you guessing until the final frame.",
+    why_this:
+      "The perfect 'one more scene' movie — clever, funny, and impossible to step away from once it starts.",
+    posterGradient:
+      "linear-gradient(155deg, #080604 0%, #1e1208 18%, #4a2c10 34%, #7a4e28 48%, #b07840 58%, #7a5530 72%, #2e1a08 88%, #080604 100%)",
+    posterGlow:
+      "radial-gradient(ellipse 75% 60% at 50% 42%, rgba(176,120,64,0.72) 0%, rgba(120,80,40,0.45) 44%, rgba(50,25,8,0.2) 72%, transparent 100%)",
+    thumbnailUrl: "/knives-out-thumbnail.jpg",
+    logoUrl: "/knives-out-logo.png.webp",
+  },
   {
     id: "f1",
     title: "Severance",
