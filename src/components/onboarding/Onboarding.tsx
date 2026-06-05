@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AccountIntegrationModal from "./AccountIntegrationModal";
 
 const PLATFORMS = [
   { id: "Netflix",     logo: "/netflix-logo.png" },
@@ -18,6 +19,7 @@ interface OnboardingProps {
 
 export default function Onboarding({ onComplete, onBrowse }: OnboardingProps) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [showIntegration, setShowIntegration] = useState(false);
 
   const toggle = (id: string) =>
     setSelected((prev) =>
@@ -68,7 +70,7 @@ export default function Onboarding({ onComplete, onBrowse }: OnboardingProps) {
           type="button"
           className="ob-cta"
           disabled={selected.length === 0}
-          onClick={() => onComplete(selected)}
+          onClick={() => setShowIntegration(true)}
         >
           Get started →
         </button>
@@ -81,6 +83,13 @@ export default function Onboarding({ onComplete, onBrowse }: OnboardingProps) {
           or browse the full catalogue
         </button>
       </div>
+
+      {showIntegration && (
+        <AccountIntegrationModal
+          platforms={selected}
+          onContinue={() => { setShowIntegration(false); onComplete(selected); }}
+        />
+      )}
     </div>
   );
 }

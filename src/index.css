@@ -478,6 +478,159 @@ input  { font-family: inherit; }
 }
 .ob-browse-link:hover { color: var(--text); }
 
+/* ===== ACCOUNT INTEGRATION MODAL ===== */
+.aim-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 8, 16, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1.5rem;
+}
+.aim-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r);
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+.aim-header {
+  padding: 2rem 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+}
+.aim-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(232, 196, 122, 0.12);
+  border: 1px solid rgba(232, 196, 122, 0.25);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+.aim-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.aim-sub {
+  font-size: 0.8rem;
+  color: var(--sub);
+  line-height: 1.5;
+  max-width: 280px;
+}
+.aim-list {
+  list-style: none;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.aim-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.aim-row:last-child { border-bottom: none; }
+.aim-logo {
+  width: 52px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(1.05);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.aim-platform-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.aim-connect-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--r-xs);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1.5px solid var(--border-md);
+  background: var(--bg-lift);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  min-width: 86px;
+  justify-content: center;
+  height: 30px;
+}
+.aim-connect-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.aim-connect-btn--done {
+  border-color: var(--green);
+  background: rgba(34, 208, 105, 0.08);
+  color: var(--green);
+  cursor: default;
+}
+.aim-connect-btn--loading {
+  cursor: default;
+}
+.aim-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--border-md);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.aim-footer {
+  padding: 1.25rem 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+.aim-cta {
+  width: 100%;
+  padding: 0.8rem;
+  background: var(--accent);
+  color: #0d0d0d;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.aim-cta:hover { background: var(--accent-hov); }
+.aim-skip {
+  font-size: 0.78rem;
+  color: var(--sub);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--muted);
+}
+.aim-skip:hover { color: var(--text); }
+
 /* ===== FOCUS MODE ===== */
 .fm-wrap {
   padding: 1.4rem 1.4rem 3rem;
