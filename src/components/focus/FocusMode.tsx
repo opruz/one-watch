@@ -114,8 +114,10 @@ function QSection({ label, children }: { label: string; children: React.ReactNod
 
 /* ── Gallery Card ── */
 function GalleryCard({ pick, offset, isActive, onClick }: {
-  pick: FocusPick; offset: number; isActive: boolean; onClick: () => void;
+  pick: FocusPick; offset: number; isActive: boolean;
+  onClick: (rect: DOMRect | null) => void;
 }) {
+  const posterRef = useRef<HTMLDivElement>(null);
   const abs     = Math.abs(offset);
   const scale   = Math.max(0.78, 1 - abs * 0.1);
   const blur    = abs * 4;
@@ -126,7 +128,7 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
     <div
       className={`fm-gallery-slot${isActive ? " fm-gallery-slot--active" : ""}`}
       style={{ transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`, zIndex: 10 - abs }}
-      onClick={onClick}
+      onClick={() => onClick(isActive ? (posterRef.current?.getBoundingClientRect() ?? null) : null)}
     >
       <div
         className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}`}
@@ -136,7 +138,7 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
           opacity,
         }}
       >
-        <div className="fm-gallery-poster">
+        <div className="fm-gallery-poster" ref={posterRef}>
           {pick.thumbnailUrl ? (
             <div className="fm-gallery-bg fm-gallery-bg--photo" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }}>
               <div className="fm-poster-grain" />
@@ -177,6 +179,7 @@ export default function FocusMode() {
   const [picks, setPicks]           = useState<FocusPick[]>(FOCUS_PICKS);
   const [activeIdx, setActiveIdx]   = useState(0);
   const [detailPick, setDetailPick] = useState<FocusPick | null>(null);
+  const [fromRect, setFromRect]     = useState<DOMRect | null>(null);
   const [isClosingDetail, setIsClosingDetail] = useState(false);
   const [saved, setSaved]           = useState<string[]>([]);
   const questionnaireRef            = useRef<HTMLDivElement>(null);
@@ -318,8 +321,8 @@ export default function FocusMode() {
                 pick={pick}
                 offset={i - activeIdx}
                 isActive={i === activeIdx}
-                onClick={() => {
-                  if (i === activeIdx) setDetailPick(pick);
+                onClick={(rect) => {
+                  if (i === activeIdx) { setDetailPick(pick); setFromRect(rect); }
                   else setActiveIdx(i);
                 }}
               />
@@ -333,6 +336,7 @@ export default function FocusMode() {
           pick={detailPick}
           saved={saved.includes(detailPick.id)}
           isClosing={isClosingDetail}
+          fromRect={fromRect}
           onSave={() => toggleSave(detailPick)}
           onRefresh={() => handleDetailRefresh(detailPick)}
           onClose={closeDetail}

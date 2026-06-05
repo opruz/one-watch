@@ -1908,6 +1908,26 @@ input  { font-family: inherit; }
   animation: mdp-hero-exit 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Suppress CSS animations when FLIP JS animation is active */
+.mdp--flip,
+.mdp--flip.mdp--closing {
+  animation: none;
+}
+.mdp--flip .mdp-hero-bg,
+.mdp--flip .mdp--closing .mdp-hero-bg {
+  animation: none;
+}
+.mdp--flip .mdp-content {
+  animation: none;
+}
+.mdp--flip .mdp-hero {
+  overflow: visible;
+  will-change: transform;
+}
+.mdp--flip .mdp-content {
+  will-change: transform, opacity;
+}
+
 /* Hero */
 .mdp-hero {
   width: 100%;

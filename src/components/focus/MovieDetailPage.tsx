@@ -1,3 +1,4 @@
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { ArrowLeft, Bookmark } from "@phosphor-icons/react";
 import { type FocusPick, PLATFORM_LOGOS } from "../../data/focusData";
 
@@ -5,17 +6,82 @@ interface Props {
   pick: FocusPick;
   saved: boolean;
   isClosing: boolean;
+  fromRect: DOMRect | null;
   onSave: () => void;
   onRefresh: () => void;
   onClose: () => void;
 }
 
-export default function MovieDetailPage({ pick, saved, isClosing, onSave, onRefresh, onClose }: Props) {
-  return (
-    <div className={`mdp${isClosing ? " mdp--closing" : ""}`}>
+const EASE = "cubic-bezier(0.4,0,0.2,1)";
+const DUR  = 420;
 
-      {/* Hero — same image as card, scrim absent so photo shows fully */}
-      <div className="mdp-hero">
+export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSave, onRefresh, onClose }: Props) {
+  const heroRef    = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const animRef    = useRef<{ heroFrom: string; contentFrom: string } | null>(null);
+
+  /* ── Entry FLIP ── */
+  useLayoutEffect(() => {
+    if (!fromRect || !heroRef.current || !contentRef.current) return;
+
+    const heroEl    = heroRef.current;
+    const contentEl = contentRef.current;
+    const heroRect  = heroEl.getBoundingClientRect();
+
+    /* Scale/translate hero from card poster rect → hero rect */
+    const sx = fromRect.width  / heroRect.width;
+    const sy = fromRect.height / heroRect.height;
+    const tx = fromRect.left   - heroRect.left;
+    const ty = fromRect.top    - heroRect.top;
+
+    const heroFrom    = `translate(${tx}px,${ty}px) scale(${sx},${sy})`;
+    const contentFrom = `translateY(${fromRect.top + fromRect.height * 0.5 - contentEl.getBoundingClientRect().top}px)`;
+
+    animRef.current = { heroFrom, contentFrom };
+
+    /* Set starting position instantly */
+    heroEl.style.transformOrigin    = "0 0";
+    heroEl.style.transform          = heroFrom;
+    heroEl.style.opacity            = "0.85";
+    contentEl.style.transform       = contentFrom;
+    contentEl.style.opacity         = "0";
+    contentEl.style.transition      = "none";
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      heroEl.style.transition    = `transform ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}`;
+      contentEl.style.transition = `transform ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}`;
+
+      heroEl.style.transform    = "translate(0,0) scale(1,1)";
+      heroEl.style.opacity      = "1";
+      contentEl.style.transform = "translateY(0)";
+      contentEl.style.opacity   = "1";
+    }));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Exit FLIP ── */
+  useEffect(() => {
+    if (!isClosing || !animRef.current || !heroRef.current || !contentRef.current) return;
+
+    const heroEl    = heroRef.current;
+    const contentEl = contentRef.current;
+    const { heroFrom, contentFrom } = animRef.current;
+
+    heroEl.style.transition    = `transform ${DUR - 30}ms ${EASE}, opacity ${DUR - 30}ms ${EASE}`;
+    contentEl.style.transition = `transform ${DUR - 30}ms ${EASE}, opacity ${DUR - 30}ms ${EASE}`;
+
+    heroEl.style.transform    = heroFrom;
+    heroEl.style.opacity      = "0.85";
+    contentEl.style.transform = contentFrom;
+    contentEl.style.opacity   = "0";
+  }, [isClosing]);
+
+  const useFlip = !!fromRect;
+
+  return (
+    <div className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}>
+
+      {/* Hero */}
+      <div className="mdp-hero" ref={heroRef}>
         {pick.thumbnailUrl ? (
           <div className="mdp-hero-bg" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }} />
         ) : (
@@ -30,8 +96,8 @@ export default function MovieDetailPage({ pick, saved, isClosing, onSave, onRefr
         </button>
       </div>
 
-      {/* Content — on dark page background below the hero */}
-      <div className="mdp-content">
+      {/* Content */}
+      <div className="mdp-content" ref={contentRef}>
         <div className="mdp-content-main">
           <div className="mdp-content-text">
             {pick.logoUrl ? (
