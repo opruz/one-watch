@@ -903,9 +903,9 @@ input  { font-family: inherit; }
       to right,
       rgba(0,0,0,0.95) 0%,
       rgba(0,0,0,0.90) 35%,
-      rgba(0,0,0,0.65) 50%,
-      rgba(0,0,0,0.22) 68%,
-      transparent 82%
+      rgba(0,0,0,0.65) 55%,
+      rgba(0,0,0,0.10) 72%,
+      transparent 75%
     ),
     linear-gradient(
       to top,
