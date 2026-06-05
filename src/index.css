@@ -902,16 +902,16 @@ input  { font-family: inherit; }
     linear-gradient(
       to right,
       rgba(0,0,0,0.95) 0%,
-      rgba(0,0,0,0.92) 22%,
-      rgba(0,0,0,0.72) 33%,
-      rgba(0,0,0,0.28) 50%,
-      transparent 68%
+      rgba(0,0,0,0.88) 40%,
+      rgba(0,0,0,0.60) 60%,
+      rgba(0,0,0,0.20) 78%,
+      transparent 92%
     ),
     linear-gradient(
       to top,
-      rgba(0,0,0,0.5) 0%,
-      rgba(0,0,0,0.12) 25%,
-      transparent 50%
+      rgba(0,0,0,0.55) 0%,
+      rgba(0,0,0,0.15) 28%,
+      transparent 52%
     );
 }
 
@@ -936,12 +936,12 @@ input  { font-family: inherit; }
   inset: 0;
   display: flex;
   align-items: flex-end;
+  padding: 1.6rem 2rem 1.8rem;
   pointer-events: none;
 }
 
 .fm-gallery-panel {
-  width: 33.333%;
-  padding: 1.4rem 1.6rem 1.6rem;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
