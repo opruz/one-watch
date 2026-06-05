@@ -156,7 +156,7 @@ export default function App() {
             {navItems.map(({ label, Icon }) => (
               <button key={label} type="button" className={`side-link${label === "Home" ? " side-link--active" : ""}`}>
                 <span className="side-link__icon"><Icon size={18} weight="duotone" /></span>
-                {label}
+                <span className="side-link__label">{label}</span>
               </button>
             ))}
           </div>
@@ -165,7 +165,7 @@ export default function App() {
             {settingsItems.map(({ label, Icon }) => (
               <button key={label} type="button" className="side-link">
                 <span className="side-link__icon"><Icon size={18} weight="duotone" /></span>
-                {label}
+                <span className="side-link__label">{label}</span>
               </button>
             ))}
             <button
@@ -177,7 +177,7 @@ export default function App() {
               }}
             >
               <span className="side-link__icon"><ArrowsClockwise size={18} weight="bold" /></span>
-              Platforms
+              <span className="side-link__label">Platforms</span>
             </button>
           </div>
         </nav>
