@@ -118,7 +118,7 @@ function GalleryCard({ pick, offset, isActive, isExpanded, onClick, saved, onSav
   onClick: () => void; saved: boolean; onSave: () => void; onRefresh: () => void;
 }) {
   const abs     = Math.abs(offset);
-  const scale   = isExpanded ? 1.03 : Math.max(0.78, 1 - abs * 0.1);
+  const scale   = Math.max(0.78, 1 - abs * 0.1);
   const blur    = abs * 4;
   const opacity = Math.max(0.5, 1 - abs * 0.28);
   const step    = 870;
@@ -349,7 +349,10 @@ export default function FocusMode() {
               ↑ Change your answers
             </button>
           </div>
-          <div className={`fm-gallery${expandedId ? " fm-gallery--expanded" : ""}`}>
+          {expandedId && (
+            <div className="fm-gallery-backdrop" onClick={() => setExpandedId(null)} />
+          )}
+          <div className="fm-gallery">
             {picks.map((pick, i) => (
               <GalleryCard
                 key={pick.id}
