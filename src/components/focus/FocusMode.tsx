@@ -24,6 +24,43 @@ interface Answers {
 
 const DEFAULT: Answers = { audience: "any", mood: "any", time: "any", avoid: [] };
 
+/* Smooth-scroll `target` to the center of its scroll container over `ms` milliseconds. */
+function smoothScrollToCenter(target: HTMLElement, ms = 1100) {
+  const container = target.closest(".main") as HTMLElement | null;
+  if (!container) { target.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+
+  const ease = (t: number) => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+
+  const start   = container.scrollTop;
+  const targetTop = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+  const end     = targetTop - (container.clientHeight - target.clientHeight) / 2;
+  const t0      = performance.now();
+
+  const tick = (now: number) => {
+    const p = Math.min((now - t0) / ms, 1);
+    container.scrollTop = start + (end - start) * ease(p);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function smoothScrollToTop(target: HTMLElement, ms = 1100) {
+  const container = target.closest(".main") as HTMLElement | null;
+  if (!container) { target.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+
+  const ease  = (t: number) => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+  const start = container.scrollTop;
+  const end   = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+  const t0    = performance.now();
+
+  const tick = (now: number) => {
+    const p = Math.min((now - t0) / ms, 1);
+    container.scrollTop = start + (end - start) * ease(p);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 type PhWeight = "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
 type PhIconComp = React.ComponentType<{ size?: number; weight?: PhWeight; color?: string }>;
 
@@ -201,7 +238,7 @@ export default function FocusMode() {
   useEffect(() => {
     if (hasSearched && !isLoading) {
       setActiveIdx(0);
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (resultsRef.current) smoothScrollToCenter(resultsRef.current);
     }
   }, [hasSearched, isLoading]);
 
@@ -240,8 +277,9 @@ export default function FocusMode() {
   const toggleSave = (pick: FocusPick) =>
     setSaved((prev) => prev.includes(pick.id) ? prev.filter((id) => id !== pick.id) : [...prev, pick.id]);
 
-  const scrollToQuestionnaire = () =>
-    questionnaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollToQuestionnaire = () => {
+    if (questionnaireRef.current) smoothScrollToTop(questionnaireRef.current);
+  };
 
   return (
     <div className="fm-page">
