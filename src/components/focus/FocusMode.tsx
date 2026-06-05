@@ -5,6 +5,7 @@ import {
   Coffee, Lightning, Drop, Sparkle, Smiley,
   Clock, Moon,
 } from "@phosphor-icons/react";
+import { getRecommendations, getOneRecommendation } from "../../lib/claude";
 import {
   FOCUS_PICKS,
   AUDIENCE_OPTIONS,
@@ -128,12 +129,13 @@ function ResultCard({ pick, onClick }: { pick: FocusPick; onClick: () => void })
 
 /* ── Expanded Detail Sheet ── */
 function ExpandedSheet({
-  pick, onClose, saved, onSave,
+  pick, onClose, saved, onSave, onRefresh,
 }: {
   pick: FocusPick;
   onClose: () => void;
   saved: boolean;
   onSave: () => void;
+  onRefresh: () => void;
 }) {
   return (
     <div className="fm-overlay" onClick={onClose} role="presentation">
@@ -184,8 +186,8 @@ function ExpandedSheet({
               <Bookmark size={16} weight={saved ? "fill" : "regular"} />
               {saved ? "Saved" : "Save for later"}
             </button>
-            <button type="button" className="fm-close-btn" onClick={onClose}>
-              Not for me
+            <button type="button" className="fm-close-btn" onClick={() => { onRefresh(); onClose(); }}>
+              Not for me — try another
             </button>
           </div>
         </div>
@@ -199,6 +201,7 @@ export default function FocusMode() {
   const [answers, setAnswers] = useState<Answers>(DEFAULT);
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [picks, setPicks] = useState<FocusPick[]>(FOCUS_PICKS);
   const [expanded, setExpanded] = useState<FocusPick | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
 
@@ -212,13 +215,40 @@ export default function FocusMode() {
     set("avoid", next);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
     setHasSearched(false);
-    setTimeout(() => {
-      setIsLoading(false);
-      setHasSearched(true);
-    }, 1200);
+    try {
+      const platforms: string[] = (() => {
+        try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
+        catch { return []; }
+      })();
+      const recs = await getRecommendations(platforms.length ? platforms : ["Netflix", "Prime", "Hulu"], answers);
+      setPicks(recs);
+    } catch {
+      // No API key or network error — fall back to static curated picks
+      setPicks(FOCUS_PICKS);
+    }
+    setIsLoading(false);
+    setHasSearched(true);
+  };
+
+  const handleRefreshCard = async (pick: FocusPick) => {
+    try {
+      const platforms: string[] = (() => {
+        try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
+        catch { return []; }
+      })();
+      const avoidTitles = picks.map((p) => p.title);
+      const newPick = await getOneRecommendation(
+        platforms.length ? platforms : ["Netflix", "Prime", "Hulu"],
+        answers,
+        avoidTitles,
+      );
+      setPicks((prev) => prev.map((p) => (p.id === pick.id ? newPick : p)));
+    } catch {
+      // silently keep the existing card
+    }
   };
 
   const toggleSave = (pick: FocusPick) => {
@@ -317,7 +347,7 @@ export default function FocusMode() {
             <p className="fm-results-sub">Tap a card to see why it's perfect for tonight</p>
           </div>
           <div className="fm-cards-row">
-            {FOCUS_PICKS.map((pick) => (
+            {picks.map((pick) => (
               <ResultCard key={pick.id} pick={pick} onClick={() => setExpanded(pick)} />
             ))}
           </div>
@@ -331,6 +361,7 @@ export default function FocusMode() {
           onClose={() => setExpanded(null)}
           saved={saved.includes(expanded.id)}
           onSave={() => toggleSave(expanded)}
+          onRefresh={() => { void handleRefreshCard(expanded); }}
         />
       )}
     </div>
