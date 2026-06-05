@@ -163,16 +163,19 @@ function GalleryCard({
 }: {
   pick: FocusPick; offset: number; isActive: boolean; onClick: () => void;
 }) {
-  const abs = Math.abs(offset);
-  const scale  = Math.max(0.68, 1 - abs * 0.11);
-  const blur   = abs * 3;
-  const opacity = Math.max(0.45, 1 - abs * 0.2);
-  const step   = 210;
+  const abs     = Math.abs(offset);
+  const scale   = Math.max(0.65, 1 - abs * 0.13);
+  const blur    = abs * 3.5;
+  const opacity = Math.max(0.38, 1 - abs * 0.25);
+  const step    = 290; // px between card centers
 
   return (
     <div
       className="fm-gallery-slot"
-      style={{ transform: `translateY(calc(-50% + ${offset * step}px))`, zIndex: 10 - abs }}
+      style={{
+        transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`,
+        zIndex: 10 - abs,
+      }}
       onClick={onClick}
     >
       <div
@@ -203,7 +206,6 @@ function GalleryCard({
             </div>
             <h3 className="fm-gallery-title">{pick.title}</h3>
             <p className="fm-gallery-meta">{pick.year} · {pick.runtime}</p>
-            {isActive && <p className="fm-gallery-desc">{pick.why_this}</p>}
           </div>
         </div>
         {!isActive && <div className="fm-gallery-dim" />}
@@ -369,9 +371,7 @@ export default function FocusMode() {
         <div ref={resultsRef} className="fm-results">
           <div className="fm-results-header">
             <p className="fm-results-label">Your picks</p>
-            <p className="fm-results-sub">
-              {activeIdx + 1} of {picks.length} — tap to explore, tap active card for details
-            </p>
+            <p className="fm-results-sub">{activeIdx + 1} of {picks.length} — tap to select, tap again for details</p>
           </div>
           <div className="fm-gallery">
             {picks.map((pick, i) => (
@@ -387,20 +387,7 @@ export default function FocusMode() {
               />
             ))}
           </div>
-          <div className="fm-gallery-nav">
-            <button
-              type="button"
-              className="fm-gallery-nav-btn"
-              disabled={activeIdx === 0}
-              onClick={() => setActiveIdx((n) => n - 1)}
-            >↑ Prev</button>
-            <button
-              type="button"
-              className="fm-gallery-nav-btn"
-              disabled={activeIdx === picks.length - 1}
-              onClick={() => setActiveIdx((n) => n + 1)}
-            >Next ↓</button>
-          </div>
+          <p className="fm-gallery-hint">↑ Scroll up to adjust your preferences</p>
         </div>
       )}
 

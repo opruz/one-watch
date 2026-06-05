@@ -795,23 +795,23 @@ input  { font-family: inherit; }
 .fm-gallery {
   position: relative;
   width: 100%;
-  height: 58vh;
+  height: 56vh;
+  min-height: 400px;
   overflow: hidden;
 }
 
 .fm-gallery-slot {
   position: absolute;
   top: 50%;
-  left: 0;
-  width: 100%;
-  padding: 0 0.5rem;
+  left: 50%;
+  width: 260px;
   transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .fm-gallery-card {
   width: 100%;
-  aspect-ratio: 16 / 7;
+  aspect-ratio: 2 / 3;
   border-radius: var(--r);
   overflow: hidden;
   position: relative;
@@ -898,10 +898,10 @@ input  { font-family: inherit; }
 .fm-gallery-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.2rem; }
 
 .fm-gallery-title {
-  font-size: 1.9rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   text-shadow: 0 2px 12px rgba(0,0,0,0.6);
 }
 
@@ -911,35 +911,21 @@ input  { font-family: inherit; }
 }
 
 .fm-gallery-desc {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: rgba(255,255,255,0.82);
   line-height: 1.55;
-  max-width: 65%;
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
   margin-top: 0.25rem;
   animation: fm-fade-in 0.3s ease;
 }
 
-.fm-gallery-nav {
-  display: flex;
-  gap: 0.6rem;
-  justify-content: center;
+.fm-gallery-hint {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
   padding-top: 0.5rem;
+  letter-spacing: 0.02em;
 }
-
-.fm-gallery-nav-btn {
-  padding: 0.4rem 1.1rem;
-  border-radius: var(--r-xs);
-  border: 1.5px solid var(--border-md);
-  background: var(--bg-lift);
-  color: var(--sub);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-.fm-gallery-nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.fm-gallery-nav-btn:disabled { opacity: 0.3; cursor: default; }
 
 /* ── Cinematic Poster ── */
 .fm-poster {
