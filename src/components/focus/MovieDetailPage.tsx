@@ -28,25 +28,31 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
     const contentEl = contentRef.current;
     if (!fromRect || !heroEl || !bodyEl || !contentEl) return;
 
-    /* Hero is position: fixed, top:0 left:0 right:0, so heroRect.top/left = 0 */
     const heroRect = heroEl.getBoundingClientRect();
-    const sx = fromRect.width  / heroRect.width;
-    const sy = fromRect.height / heroRect.height;
-    const tx = fromRect.left;
-    const ty = fromRect.top;
 
-    const heroFrom = `translate(${tx}px,${ty}px) scale(${sx},${sy})`;
+    /*
+     * Uniform scale so the image never stretches — match card width only.
+     * transform-origin: center bottom → image grows upward from the card's
+     * bottom edge, expands symmetrically left/right.
+     */
+    const sx = fromRect.width / heroRect.width;
+
+    /* Align hero's bottom-center to card's bottom-center */
+    const tx = (fromRect.left + fromRect.width * 0.5) - heroRect.width * 0.5;
+    const ty = fromRect.bottom - heroRect.height;
+
+    const heroFrom = `translate(${tx}px,${ty}px) scale(${sx})`;
     fromRef.current = heroFrom;
 
     /* Instant "first" state — runs before browser paints */
     heroEl.style.transition      = "none";
-    heroEl.style.transformOrigin = "0 0";
+    heroEl.style.transformOrigin = "center bottom";
     heroEl.style.transform       = heroFrom;
     bodyEl.style.transition      = "none";
     bodyEl.style.opacity         = "0";
     contentEl.style.transition   = "none";
     contentEl.style.opacity      = "0";
-    contentEl.style.transform    = "translateY(-28px)";
+    contentEl.style.transform    = "translateY(-48px)";
 
     /* Animate to final state after first paint */
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -54,8 +60,8 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
       heroEl.style.transform   = "none";
       bodyEl.style.transition  = `opacity ${DUR}ms ${EASE}`;
       bodyEl.style.opacity     = "1";
-      const delay = Math.round(DUR * 0.18);
-      contentEl.style.transition = `opacity ${Math.round(DUR * 0.65)}ms ${EASE} ${delay}ms, transform ${DUR}ms ${EASE} ${delay}ms`;
+      const delay = Math.round(DUR * 0.2);
+      contentEl.style.transition = `opacity ${Math.round(DUR * 0.7)}ms ${EASE} ${delay}ms, transform ${DUR}ms ${EASE} ${delay}ms`;
       contentEl.style.opacity  = "1";
       contentEl.style.transform = "none";
     }));
