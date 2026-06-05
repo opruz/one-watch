@@ -88,45 +88,6 @@ function QSection({ label, children }: { label: string; children: React.ReactNod
   );
 }
 
-/* ── Cinematic Poster ── */
-function CinematicPoster({ pick }: { pick: FocusPick }) {
-  return (
-    <div className="fm-poster" style={{ background: pick.posterGradient }}>
-      <div className="fm-poster-glow" style={{ background: pick.posterGlow }} />
-      <div className="fm-poster-grain" />
-      <div className="fm-poster-score">★ {pick.imdb_score}</div>
-      <div className="fm-poster-platform" style={{ borderColor: pick.platformColor }}>
-        <span style={{ color: pick.platformColor }}>{pick.platform}</span>
-      </div>
-      <div className="fm-poster-ai-badge">AI Art</div>
-    </div>
-  );
-}
-
-/* ── Result Card ── */
-function ResultCard({ pick, onClick }: { pick: FocusPick; onClick: () => void }) {
-  return (
-    <div
-      className="fm-card"
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}
-    >
-      <CinematicPoster pick={pick} />
-      <div className="fm-card-body">
-        <p className="fm-card-title">{pick.title}</p>
-        <p className="fm-card-meta">{pick.year} · {pick.runtime}</p>
-        <div className="fm-card-tags">
-          {pick.mood_tags.slice(0, 2).map((tag) => (
-            <span key={tag} className="fm-tag">{tag}</span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── Expanded Detail Sheet ── */
 function ExpandedSheet({
   pick, onClose, saved, onSave, onRefresh,
@@ -196,6 +157,61 @@ function ExpandedSheet({
   );
 }
 
+/* ── Gallery Card ── */
+function GalleryCard({
+  pick, offset, isActive, onClick,
+}: {
+  pick: FocusPick; offset: number; isActive: boolean; onClick: () => void;
+}) {
+  const abs = Math.abs(offset);
+  const scale  = Math.max(0.68, 1 - abs * 0.11);
+  const blur   = abs * 3;
+  const opacity = Math.max(0.45, 1 - abs * 0.2);
+  const step   = 210;
+
+  return (
+    <div
+      className="fm-gallery-slot"
+      style={{ transform: `translateY(calc(-50% + ${offset * step}px))`, zIndex: 10 - abs }}
+      onClick={onClick}
+    >
+      <div
+        className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}`}
+        style={{
+          transform: `scale(${scale})`,
+          filter: blur > 0 ? `blur(${blur}px)` : "none",
+          opacity,
+        }}
+      >
+        <div className="fm-gallery-bg" style={{ background: pick.posterGradient }}>
+          <div className="fm-gallery-glow" style={{ background: pick.posterGlow }} />
+          <div className="fm-poster-grain" />
+          <div className="fm-gallery-scrim" />
+        </div>
+        <div className="fm-gallery-overlay">
+          <div className="fm-gallery-top">
+            <span className="fm-gallery-score">★ {pick.imdb_score}</span>
+            <span className="fm-gallery-platform" style={{ color: pick.platformColor }}>
+              {pick.platform}
+            </span>
+          </div>
+          <div className="fm-gallery-bottom">
+            <div className="fm-gallery-tags">
+              {pick.mood_tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="fm-tag">{tag}</span>
+              ))}
+            </div>
+            <h3 className="fm-gallery-title">{pick.title}</h3>
+            <p className="fm-gallery-meta">{pick.year} · {pick.runtime}</p>
+            {isActive && <p className="fm-gallery-desc">{pick.why_this}</p>}
+          </div>
+        </div>
+        {!isActive && <div className="fm-gallery-dim" />}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main FocusMode component ── */
 export default function FocusMode() {
   const [answers, setAnswers] = useState<Answers>(DEFAULT);
@@ -203,6 +219,7 @@ export default function FocusMode() {
   const [isLoading, setIsLoading] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [picks, setPicks] = useState<FocusPick[]>(FOCUS_PICKS);
+  const [activeIdx, setActiveIdx] = useState(0);
   const [expanded, setExpanded] = useState<FocusPick | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
 
@@ -218,6 +235,7 @@ export default function FocusMode() {
 
   useEffect(() => {
     if (hasSearched && !isLoading) {
+      setActiveIdx(0);
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [hasSearched, isLoading]);
@@ -351,12 +369,37 @@ export default function FocusMode() {
         <div ref={resultsRef} className="fm-results">
           <div className="fm-results-header">
             <p className="fm-results-label">Your picks</p>
-            <p className="fm-results-sub">Tap a card to see why it's perfect for tonight</p>
+            <p className="fm-results-sub">
+              {activeIdx + 1} of {picks.length} — tap to explore, tap active card for details
+            </p>
           </div>
-          <div className="fm-cards-row">
-            {picks.map((pick) => (
-              <ResultCard key={pick.id} pick={pick} onClick={() => setExpanded(pick)} />
+          <div className="fm-gallery">
+            {picks.map((pick, i) => (
+              <GalleryCard
+                key={pick.id}
+                pick={pick}
+                offset={i - activeIdx}
+                isActive={i === activeIdx}
+                onClick={() => {
+                  if (i === activeIdx) setExpanded(pick);
+                  else setActiveIdx(i);
+                }}
+              />
             ))}
+          </div>
+          <div className="fm-gallery-nav">
+            <button
+              type="button"
+              className="fm-gallery-nav-btn"
+              disabled={activeIdx === 0}
+              onClick={() => setActiveIdx((n) => n - 1)}
+            >↑ Prev</button>
+            <button
+              type="button"
+              className="fm-gallery-nav-btn"
+              disabled={activeIdx === picks.length - 1}
+              onClick={() => setActiveIdx((n) => n + 1)}
+            >Next ↓</button>
           </div>
         </div>
       )}
