@@ -678,28 +678,28 @@ input  { font-family: inherit; }
 .fm-questionnaire {
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  gap: 2rem;
 }
 
 .fm-intro { text-align: center; display: flex; flex-direction: column; gap: 0.35rem; padding-bottom: 0.4rem; }
 .fm-intro-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
-.fm-intro-title  { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
-.fm-intro-hint   { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+.fm-intro-title  { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+.fm-intro-hint   { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
 
-.fm-section { display: flex; flex-direction: column; gap: 0.55rem; }
+.fm-section { display: flex; flex-direction: column; gap: 0.7rem; }
 
 .fm-section-label {
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--sub);
 }
 
 .fm-option-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.45rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
 }
 
 .fm-option {
