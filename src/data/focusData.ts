@@ -14,6 +14,7 @@ export interface FocusPick {
   posterGlow: string;
   thumbnailUrl?: string;
   logoUrl?: string;
+  watchPlatforms?: string[];
 }
 
 /** Dummy picks — always shown in Focus mode (no API key required) */
@@ -29,7 +30,7 @@ export const FOCUS_PICKS: FocusPick[] = [
     runtime: "2h 10m",
     imdb_score: 7.9,
     description:
-      "When renowned crime novelist Harlan Thrombey is found dead after his 85th birthday party, detective Benoit Blanc is mysteriously enlisted to investigate. A sharp, witty whodunit that keeps you guessing until the final frame.",
+      "When renowned crime novelist Harlan Thrombey is found dead at his estate just after his 85th birthday, the inquisitive and debonair Detective Benoit Blanc is mysteriously enlisted to investigate.",
     why_this:
       "The perfect 'one more scene' movie — clever, funny, and impossible to step away from once it starts.",
     posterGradient:
@@ -38,6 +39,7 @@ export const FOCUS_PICKS: FocusPick[] = [
       "radial-gradient(ellipse 75% 60% at 50% 42%, rgba(176,120,64,0.72) 0%, rgba(120,80,40,0.45) 44%, rgba(50,25,8,0.2) 72%, transparent 100%)",
     thumbnailUrl: "/knives-out-thumbnail.jpg",
     logoUrl: "/knives-out-logo.png.webp",
+    watchPlatforms: ["Prime Video", "Apple TV+"],
   },
   {
     id: "f1",
@@ -120,6 +122,17 @@ export const FOCUS_PICKS: FocusPick[] = [
       "radial-gradient(ellipse 80% 66% at 52% 40%, rgba(240,80,220,0.78) 0%, rgba(140,40,220,0.5) 40%, rgba(0,100,180,0.22) 70%, transparent 100%)",
   },
 ];
+
+export const PLATFORM_LOGOS: Record<string, string> = {
+  "Netflix":     "/netflix-logo.png",
+  "Prime Video": "/prime-video-logo.png",
+  "Disney+":     "/disney-plus-logo.svg",
+  "HBO Max":     "/hbo-max-logo.png",
+  "Hulu":        "/hulu-logo.png",
+  "Apple TV+":   "/apple-tv-plus-logo.png",
+  "Peacock":     "/peacock-logo.png",
+  "Tubi":        "/tubi-logo.svg",
+};
 
 export const PLATFORM_COLORS: Record<string, string> = {
   Netflix: "#E50914",

@@ -8,6 +8,7 @@ import {
 import { getRecommendations, getOneRecommendation } from "../../lib/claude";
 import {
   FOCUS_PICKS,
+  PLATFORM_LOGOS,
   AUDIENCE_OPTIONS,
   MOOD_OPTIONS,
   TIME_OPTIONS,
@@ -205,20 +206,27 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
           </div>
         )}
         <div className="fm-gallery-overlay">
-          <div className="fm-gallery-top">
-            <span className="fm-gallery-score">★ {pick.imdb_score}</span>
-            <span className="fm-gallery-platform" style={{ color: pick.platformColor }}>{pick.platform}</span>
-          </div>
-          <div className="fm-gallery-bottom">
-            <div className="fm-gallery-tags">
-              {pick.mood_tags.slice(0, 3).map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
-            </div>
+          <div className="fm-gallery-panel">
             {pick.logoUrl ? (
               <img src={pick.logoUrl} alt={pick.title} className="fm-gallery-logo" draggable={false} />
             ) : (
               <h3 className="fm-gallery-title">{pick.title}</h3>
             )}
-            <p className="fm-gallery-meta">{pick.year} · {pick.runtime}</p>
+            <div className="fm-gallery-tags">
+              {pick.mood_tags.slice(0, 3).map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
+            </div>
+            <p className="fm-gallery-meta">{pick.year} · {pick.runtime} · ★ {pick.imdb_score}</p>
+            <p className="fm-gallery-desc">{pick.description}</p>
+            {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
+              <div className="fm-gallery-watch">
+                {pick.watchPlatforms.map((plat) => (
+                  <button key={plat} type="button" className="fm-watch-btn">
+                    <img src={PLATFORM_LOGOS[plat] ?? ""} alt={plat} className="fm-watch-btn-logo" />
+                    <span>Watch now</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         {!isActive && <div className="fm-gallery-dim" />}
