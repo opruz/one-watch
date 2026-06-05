@@ -902,10 +902,10 @@ input  { font-family: inherit; }
     linear-gradient(
       to right,
       rgba(0,0,0,0.95) 0%,
-      rgba(0,0,0,0.88) 40%,
-      rgba(0,0,0,0.60) 60%,
-      rgba(0,0,0,0.20) 78%,
-      transparent 92%
+      rgba(0,0,0,0.90) 35%,
+      rgba(0,0,0,0.65) 50%,
+      rgba(0,0,0,0.22) 68%,
+      transparent 82%
     ),
     linear-gradient(
       to top,
@@ -941,7 +941,7 @@ input  { font-family: inherit; }
 }
 
 .fm-gallery-panel {
-  width: 100%;
+  width: 50%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -985,14 +985,15 @@ input  { font-family: inherit; }
 
 .fm-watch-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.3rem;
   background: rgba(255,255,255,0.13);
   border: 1px solid rgba(255,255,255,0.22);
   border-radius: var(--r-xs);
-  padding: 0.32rem 0.7rem;
+  padding: 0.55rem 0.9rem;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -1002,7 +1003,7 @@ input  { font-family: inherit; }
 .fm-watch-btn:hover { background: rgba(255,255,255,0.24); }
 
 .fm-watch-btn-logo {
-  height: 13px;
+  height: 18px;
   width: auto;
   object-fit: contain;
   filter: brightness(0) invert(1);
