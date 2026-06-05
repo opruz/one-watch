@@ -29,7 +29,7 @@ function smoothScrollToCenter(target: HTMLElement, ms = 1100) {
   const container = target.closest(".main") as HTMLElement | null;
   if (!container) { target.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
 
-  const ease = (t: number) => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+  const ease = (t: number) => t < 0.5 ? 8*t*t*t*t : 1 - Math.pow(-2*t+2, 4)/2;
 
   const start   = container.scrollTop;
   const targetTop = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
@@ -48,7 +48,7 @@ function smoothScrollToTop(target: HTMLElement, ms = 1100) {
   const container = target.closest(".main") as HTMLElement | null;
   if (!container) { target.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
 
-  const ease  = (t: number) => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+  const ease  = (t: number) => t < 0.5 ? 8*t*t*t*t : 1 - Math.pow(-2*t+2, 4)/2;
   const start = container.scrollTop;
   const end   = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
   const t0    = performance.now();
