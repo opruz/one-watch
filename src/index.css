@@ -667,6 +667,57 @@ input  { font-family: inherit; }
 .aim-skip:hover { color: var(--text); }
 
 /* ===== FOCUS MODE ===== */
+.fm-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.fm-page-hint {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  padding: 0.75rem 1rem 0;
+}
+
+.fm-gallery-section {
+  width: 100%;
+  padding: 0.75rem 0 1.25rem;
+}
+
+.fm-gallery-header {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.4rem 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fm-refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.85rem;
+  border-radius: var(--r-xs);
+  border: 1.5px solid var(--border-md);
+  background: var(--bg-lift);
+  color: var(--sub);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.fm-refresh-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.fm-refresh-btn:disabled { opacity: 0.5; cursor: default; }
+
+.fm-spinner--sm {
+  width: 12px;
+  height: 12px;
+  border-width: 1.5px;
+}
+
 .fm-wrap {
   padding: 1.4rem 1.4rem 3rem;
   max-width: 900px;
@@ -795,8 +846,8 @@ input  { font-family: inherit; }
 .fm-gallery {
   position: relative;
   width: 100%;
-  height: 56vh;
-  min-height: 400px;
+  height: 55vh;
+  min-height: 340px;
   overflow: hidden;
 }
 
@@ -804,14 +855,15 @@ input  { font-family: inherit; }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 260px;
+  width: 900px;
+  max-width: calc(100% - 2rem);
   transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .fm-gallery-card {
   width: 100%;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 16 / 7;
   border-radius: var(--r);
   overflow: hidden;
   position: relative;
@@ -898,11 +950,11 @@ input  { font-family: inherit; }
 .fm-gallery-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.2rem; }
 
 .fm-gallery-title {
-  font-size: 1.25rem;
+  font-size: 2rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
 }
 
 .fm-gallery-meta {
@@ -919,12 +971,9 @@ input  { font-family: inherit; }
   animation: fm-fade-in 0.3s ease;
 }
 
-.fm-gallery-hint {
-  text-align: center;
-  font-size: 0.7rem;
-  color: var(--muted);
-  padding-top: 0.5rem;
-  letter-spacing: 0.02em;
+.fm-questionnaire {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
 }
 
 /* ── Cinematic Poster ── */

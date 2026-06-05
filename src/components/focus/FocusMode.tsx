@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   Crosshair, FilmStrip, Television, X, Bookmark,
   Star, User, Heart, Users, UsersThree,
   Coffee, Lightning, Drop, Sparkle, Smiley,
-  Clock, Moon,
+  Clock, Moon, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import { getRecommendations, getOneRecommendation } from "../../lib/claude";
 import {
@@ -164,10 +164,10 @@ function GalleryCard({
   pick: FocusPick; offset: number; isActive: boolean; onClick: () => void;
 }) {
   const abs     = Math.abs(offset);
-  const scale   = Math.max(0.65, 1 - abs * 0.13);
-  const blur    = abs * 3.5;
-  const opacity = Math.max(0.38, 1 - abs * 0.25);
-  const step    = 290; // px between card centers
+  const scale   = Math.max(0.78, 1 - abs * 0.1);
+  const blur    = abs * 4;
+  const opacity = Math.max(0.5, 1 - abs * 0.28);
+  const step    = 870;
 
   return (
     <div
@@ -217,9 +217,7 @@ function GalleryCard({
 /* ── Main FocusMode component ── */
 export default function FocusMode() {
   const [answers, setAnswers] = useState<Answers>(DEFAULT);
-  const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const resultsRef = useRef<HTMLDivElement>(null);
   const [picks, setPicks] = useState<FocusPick[]>(FOCUS_PICKS);
   const [activeIdx, setActiveIdx] = useState(0);
   const [expanded, setExpanded] = useState<FocusPick | null>(null);
@@ -235,37 +233,27 @@ export default function FocusMode() {
     set("avoid", next);
   };
 
-  useEffect(() => {
-    if (hasSearched && !isLoading) {
-      setActiveIdx(0);
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [hasSearched, isLoading]);
+  const getPlatforms = (): string[] => {
+    try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
+    catch { return []; }
+  };
 
-  const handleSubmit = async () => {
+  const handleRefresh = async () => {
     setIsLoading(true);
-    setHasSearched(false);
     try {
-      const platforms: string[] = (() => {
-        try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
-        catch { return []; }
-      })();
+      const platforms = getPlatforms();
       const recs = await getRecommendations(platforms.length ? platforms : ["Netflix", "Prime", "Hulu"], answers);
       setPicks(recs);
+      setActiveIdx(0);
     } catch {
-      // No API key or network error — fall back to static curated picks
       setPicks(FOCUS_PICKS);
     }
     setIsLoading(false);
-    setHasSearched(true);
   };
 
   const handleRefreshCard = async (pick: FocusPick) => {
     try {
-      const platforms: string[] = (() => {
-        try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
-        catch { return []; }
-      })();
+      const platforms = getPlatforms();
       const avoidTitles = picks.map((p) => p.title);
       const newPick = await getOneRecommendation(
         platforms.length ? platforms : ["Netflix", "Prime", "Hulu"],
@@ -285,113 +273,100 @@ export default function FocusMode() {
   };
 
   return (
-    <div className="fm-wrap">
-      {/* Questionnaire */}
-      <div className="fm-questionnaire">
-        <div className="fm-intro">
-          <p className="fm-intro-eyebrow">
-            <Crosshair size={14} weight="duotone" /> Focus Mode
-          </p>
-          <h2 className="fm-intro-title">What are you in the mood for?</h2>
-          <p className="fm-intro-hint">
-            Everything defaults to Any — just hit the button.
-          </p>
+    <div className="fm-page">
+      {/* Hint */}
+      <p className="fm-page-hint">← → Browse suggestions · ↓ Adjust your preferences below</p>
+
+      {/* Gallery — full width */}
+      <div className="fm-gallery-section">
+        <div className="fm-gallery-header">
+          <div>
+            <p className="fm-results-label">
+              <Crosshair size={12} weight="duotone" /> Tonight's picks
+            </p>
+            <p className="fm-results-sub">{activeIdx + 1} of {picks.length} — tap active card for details</p>
+          </div>
+          <button
+            type="button"
+            className="fm-refresh-btn"
+            onClick={handleRefresh}
+            disabled={isLoading}
+          >
+            {isLoading
+              ? <span className="fm-spinner fm-spinner--sm" />
+              : <><ArrowsClockwise size={13} weight="bold" /> Refresh</>
+            }
+          </button>
         </div>
 
-        <QSection label="Who's watching?">
-          <OptionGrid
-            options={AUDIENCE_OPTIONS}
-            selected={answers.audience}
-            onSelect={(v) => set("audience", v)}
-          />
-        </QSection>
-
-        <QSection label="What's your mood?">
-          <OptionGrid
-            options={MOOD_OPTIONS}
-            selected={answers.mood}
-            onSelect={(v) => set("mood", v)}
-          />
-        </QSection>
-
-        <QSection label="How much time?">
-          <OptionGrid
-            options={TIME_OPTIONS}
-            selected={answers.time}
-            onSelect={(v) => set("time", v)}
-          />
-        </QSection>
-
-        <QSection label="Anything to avoid?">
-          <div className="fm-avoid-chips">
-            {AVOID_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={`fm-avoid-chip${answers.avoid.includes(opt.value) ? " fm-avoid-chip--on" : ""}`}
-                onClick={() => toggleAvoid(opt.value)}
-              >
-                {answers.avoid.includes(opt.value) && <X size={11} weight="bold" />}
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </QSection>
-
-        <button
-          type="button"
-          className="fm-cta"
-          onClick={handleSubmit}
-          disabled={isLoading}
-        >
-          {isLoading ? <span className="fm-spinner" /> : "Find something to watch"}
-        </button>
+        <div className="fm-gallery">
+          {picks.map((pick, i) => (
+            <GalleryCard
+              key={pick.id}
+              pick={pick}
+              offset={i - activeIdx}
+              isActive={i === activeIdx}
+              onClick={() => {
+                if (i === activeIdx) setExpanded(pick);
+                else setActiveIdx(i);
+              }}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Loading skeletons */}
-      {isLoading && (
-        <div className="fm-results">
-          <p className="fm-results-label">Finding your picks…</p>
-          <div className="fm-cards-row">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="fm-card fm-card--skeleton">
-                <div className="fm-skeleton-poster" />
-                <div className="fm-card-body">
-                  <div className="fm-skeleton-line fm-skeleton-line--80" />
-                  <div className="fm-skeleton-line fm-skeleton-line--50" />
-                </div>
-              </div>
-            ))}
+      {/* Questionnaire — constrained width, below gallery */}
+      <div className="fm-wrap">
+        <div className="fm-questionnaire">
+          <div className="fm-intro">
+            <h2 className="fm-intro-title">Adjust your preferences</h2>
+            <p className="fm-intro-hint">
+              Change any filter and hit refresh above.
+            </p>
           </div>
-        </div>
-      )}
 
-      {/* Results */}
-      {hasSearched && !isLoading && (
-        <div ref={resultsRef} className="fm-results">
-          <div className="fm-results-header">
-            <p className="fm-results-label">Your picks</p>
-            <p className="fm-results-sub">{activeIdx + 1} of {picks.length} — tap to select, tap again for details</p>
-          </div>
-          <div className="fm-gallery">
-            {picks.map((pick, i) => (
-              <GalleryCard
-                key={pick.id}
-                pick={pick}
-                offset={i - activeIdx}
-                isActive={i === activeIdx}
-                onClick={() => {
-                  if (i === activeIdx) setExpanded(pick);
-                  else setActiveIdx(i);
-                }}
-              />
-            ))}
-          </div>
-          <p className="fm-gallery-hint">↑ Scroll up to adjust your preferences</p>
-        </div>
-      )}
+          <QSection label="Who's watching?">
+            <OptionGrid
+              options={AUDIENCE_OPTIONS}
+              selected={answers.audience}
+              onSelect={(v) => set("audience", v)}
+            />
+          </QSection>
 
-      {/* Expanded bottom sheet */}
+          <QSection label="What's your mood?">
+            <OptionGrid
+              options={MOOD_OPTIONS}
+              selected={answers.mood}
+              onSelect={(v) => set("mood", v)}
+            />
+          </QSection>
+
+          <QSection label="How much time?">
+            <OptionGrid
+              options={TIME_OPTIONS}
+              selected={answers.time}
+              onSelect={(v) => set("time", v)}
+            />
+          </QSection>
+
+          <QSection label="Anything to avoid?">
+            <div className="fm-avoid-chips">
+              {AVOID_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`fm-avoid-chip${answers.avoid.includes(opt.value) ? " fm-avoid-chip--on" : ""}`}
+                  onClick={() => toggleAvoid(opt.value)}
+                >
+                  {answers.avoid.includes(opt.value) && <X size={11} weight="bold" />}
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </QSection>
+        </div>
+      </div>
+
       {expanded && (
         <ExpandedSheet
           pick={expanded}
