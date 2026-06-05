@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Crosshair, Television, X,
   Star, User, Heart, Users, UsersThree,
@@ -146,6 +146,47 @@ export default function FocusMode() {
   const [isClosingDetail, setIsClosingDetail] = useState(false);
   const [saved, setSaved]         = useState<string[]>([]);
 
+  /* ── Trackpad horizontal scroll ── */
+  const overlayRef      = useRef<HTMLDivElement>(null);
+  const wAccum          = useRef(0);
+  const wCooldown       = useRef(0);
+  const wReset          = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const picksLenRef     = useRef(picks.length);
+  const detailOpenRef   = useRef(false);
+  picksLenRef.current   = picks.length;
+  detailOpenRef.current = !!(detailPick);
+
+  useEffect(() => {
+    const el = overlayRef.current;
+    if (!el) return;
+    const THRESHOLD = 90;   /* px to accumulate before advancing */
+    const COOLDOWN  = 480;  /* ms lockout after each advance */
+
+    const onWheel = (e: WheelEvent) => {
+      if (detailOpenRef.current) return;
+      const ax = Math.abs(e.deltaX);
+      const ay = Math.abs(e.deltaY);
+      if (ax < 6 || ay > ax) return;          /* must be predominantly horizontal */
+      e.preventDefault();
+      const now = Date.now();
+      if (now < wCooldown.current) return;     /* still in cooldown */
+      const px = e.deltaMode === 1 ? e.deltaX * 16 : e.deltaMode === 2 ? e.deltaX * 100 : e.deltaX;
+      wAccum.current += px;
+      /* reset accumulator if no wheel events for 180 ms (prevents slow drift) */
+      if (wReset.current) clearTimeout(wReset.current);
+      wReset.current = setTimeout(() => { wAccum.current = 0; }, 180);
+      if (Math.abs(wAccum.current) >= THRESHOLD) {
+        const dir = wAccum.current > 0 ? 1 : -1;
+        wAccum.current = 0;
+        wCooldown.current = now + COOLDOWN;
+        setActiveIdx(i => Math.max(0, Math.min(picksLenRef.current - 1, i + dir)));
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   const set = (field: keyof Answers, value: string | string[]) =>
     setAnswers((prev) => ({ ...prev, [field]: value }));
 
@@ -246,7 +287,7 @@ export default function FocusMode() {
       </div>
 
       {/* ── Results overlay — position:fixed, slides up over questionnaire ── */}
-      <div className={`fm-results-overlay${view === "r" ? " fm-results-overlay--in" : ""}`}>
+      <div className={`fm-results-overlay${view === "r" ? " fm-results-overlay--in" : ""}`} ref={overlayRef}>
         {isLoading ? (
           <div className="fm-gallery-skeleton" />
         ) : (
