@@ -1,31 +1,32 @@
 import { useState } from "react";
-import { Crosshair, Compass } from "@phosphor-icons/react";
 
 const PLATFORMS = [
-  { id: "Netflix", label: "Netflix", color: "#E50914", abbr: "N" },
-  { id: "Prime Video", label: "Prime Video", color: "#00A8E1", abbr: "P" },
-  { id: "Disney+", label: "Disney+", color: "#1A6EE5", abbr: "D+" },
-  { id: "Max", label: "Max", color: "#702BE2", abbr: "M" },
-  { id: "Hulu", label: "Hulu", color: "#1CE783", abbr: "H" },
-  { id: "Apple TV+", label: "Apple TV+", color: "#a0a0a0", abbr: "▶" },
+  { id: "Netflix",     logo: "/netflix-logo.png" },
+  { id: "Prime Video", logo: "/prime-video-logo.png" },
+  { id: "Disney+",     logo: "/disney-plus-logo.png" },
+  { id: "HBO Max",     logo: "/hbo-max-logo.jpeg" },
+  { id: "Hulu",        logo: "/hulu-logo.png" },
+  { id: "Apple TV+",   logo: "/apple-tv-plus-logo.png" },
+  { id: "Peacock",     logo: "/peacock-logo.png" },
+  { id: "Tubi",        logo: "/tubi-logo.png" },
 ];
 
 interface OnboardingProps {
   onComplete: (platforms: string[]) => void;
+  onBrowse: (platforms: string[]) => void;
 }
 
-export default function Onboarding({ onComplete }: OnboardingProps) {
+export default function Onboarding({ onComplete, onBrowse }: OnboardingProps) {
   const [selected, setSelected] = useState<string[]>([]);
 
   const toggle = (id: string) =>
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
     );
 
   return (
     <div className="ob-wrap">
       <div className="ob-inner">
-        {/* Brand */}
         <div className="ob-brand">
           <span className="ob-logo">◉</span>
           <span className="ob-logo-text">One Watch</span>
@@ -34,52 +35,35 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         <div className="ob-headline">
           <h1 className="ob-title">What are you watching tonight?</h1>
           <p className="ob-sub">
-            Two modes. One perfect pick or the full catalogue — your call.
+            Select your streaming services and we'll find the perfect pick for your mood.
           </p>
         </div>
 
-        {/* Mode preview pills */}
-        <div className="ob-modes">
-          <div className="ob-mode-card">
-            <span className="ob-mode-icon"><Crosshair size={22} weight="duotone" /></span>
-            <div>
-              <p className="ob-mode-name">Focus</p>
-              <p className="ob-mode-desc">Answer 3 questions. Get one perfect pick.</p>
-            </div>
-          </div>
-          <div className="ob-mode-card">
-            <span className="ob-mode-icon"><Compass size={22} weight="duotone" /></span>
-            <div>
-              <p className="ob-mode-name">Explore</p>
-              <p className="ob-mode-desc">Browse the full catalogue by mood & genre.</p>
-            </div>
-          </div>
-        </div>
+        <p className="ob-platform-label">Your services</p>
 
-        <p className="ob-platform-label">Select the services you subscribe to</p>
-
-        {/* Platform grid */}
         <div className="ob-platform-grid">
           {PLATFORMS.map((p) => (
             <button
               key={p.id}
               type="button"
               className={`ob-platform-btn${selected.includes(p.id) ? " ob-platform-btn--on" : ""}`}
-              style={{ "--pc": p.color } as React.CSSProperties}
               onClick={() => toggle(p.id)}
+              aria-label={p.id}
+              aria-pressed={selected.includes(p.id)}
             >
-              <span className="ob-platform-abbr" style={{ color: p.color }}>
-                {p.abbr}
-              </span>
-              <span className="ob-platform-name">{p.label}</span>
+              <img
+                src={p.logo}
+                alt={p.id}
+                className="ob-platform-logo"
+                draggable={false}
+              />
               {selected.includes(p.id) && (
-                <span className="ob-platform-check">✓</span>
+                <span className="ob-platform-check" aria-hidden="true">✓</span>
               )}
             </button>
           ))}
         </div>
 
-        {/* CTA */}
         <button
           type="button"
           className="ob-cta"
@@ -88,9 +72,14 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         >
           Get started →
         </button>
-        {selected.length === 0 && (
-          <p className="ob-hint">Select at least one platform to continue</p>
-        )}
+
+        <button
+          type="button"
+          className="ob-browse-link"
+          onClick={() => onBrowse(selected)}
+        >
+          or browse the full catalogue
+        </button>
       </div>
     </div>
   );

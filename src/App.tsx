@@ -87,6 +87,16 @@ export default function App() {
   function handleOnboardingComplete(selected: string[]) {
     localStorage.setItem("ow-platforms", JSON.stringify(selected));
     setPlatforms(selected);
+    setMode("focus");
+    setOnboarded(true);
+  }
+
+  function handleOnboardingBrowse(selected: string[]) {
+    if (selected.length) {
+      localStorage.setItem("ow-platforms", JSON.stringify(selected));
+      setPlatforms(selected);
+    }
+    setMode("explore");
     setOnboarded(true);
   }
 
@@ -119,7 +129,7 @@ export default function App() {
   if (onboarded === null) return <div className="splash" />;
 
   // Onboarding
-  if (!onboarded) return <Onboarding onComplete={handleOnboardingComplete} />;
+  if (!onboarded) return <Onboarding onComplete={handleOnboardingComplete} onBrowse={handleOnboardingBrowse} />;
 
   const navItems: { label: string; Icon: PhIconComp }[] = [
     { label: "Home", Icon: House },
