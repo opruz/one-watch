@@ -21,21 +21,23 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
   const contentRef = useRef<HTMLDivElement>(null);
   const flyRef     = useRef<HTMLDivElement>(null);
   const scrimRef   = useRef<HTMLDivElement>(null);
+  const blendRef   = useRef<HTMLDivElement>(null);
   const savedRect  = useRef<DOMRect | null>(null);
 
   /* ── Entry ── */
   useLayoutEffect(() => {
     const flyEl     = flyRef.current;
     const scrimEl   = scrimRef.current;
+    const blendEl   = blendRef.current;
     const bodyEl    = bodyRef.current;
     const contentEl = contentRef.current;
     const heroEl    = heroRef.current;
-    if (!fromRect || !flyEl || !scrimEl || !bodyEl || !contentEl || !heroEl) return;
+    if (!fromRect || !flyEl || !scrimEl || !blendEl || !bodyEl || !contentEl || !heroEl) return;
 
     savedRect.current = fromRect;
     const { width: heroW, height: heroH } = heroEl.getBoundingClientRect();
 
-    /* Flying card: starts exactly where gallery card poster is */
+    /* Flying card starts at card's exact bounds */
     flyEl.style.transition   = "none";
     flyEl.style.top          = `${fromRect.top}px`;
     flyEl.style.left         = `${fromRect.left}px`;
@@ -44,27 +46,31 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
     flyEl.style.borderRadius = "16px";
     flyEl.style.opacity      = "1";
 
-    /* Scrim starts at full card-darkness, will fade out as card expands */
+    /* Scrim starts fully opaque (card darkness) */
     scrimEl.style.transition = "none";
     scrimEl.style.opacity    = "1";
 
-    /* Real hero hidden until fly finishes */
+    /* Blend gradient starts invisible — will fade in over the image */
+    blendEl.style.transition = "none";
+    blendEl.style.opacity    = "0";
+
+    /* Hero hidden until fly finishes */
     heroEl.style.transition = "none";
     heroEl.style.opacity    = "0";
 
-    /* Body slides up from the card's Y position while fading in —
-       this makes the text appear to come from the same place as the card */
-    const bodyOffset = fromRect.top - heroH;
+    /* Body stays at natural position, just invisible */
     bodyEl.style.transition = "none";
-    bodyEl.style.transform  = `translateY(${bodyOffset}px)`;
     bodyEl.style.opacity    = "0";
+    bodyEl.style.overflow   = "hidden"; /* clip content above body's top edge during animation */
 
-    /* Content hidden, reveals during body slide */
+    /* Content slides from card's Y into the body area */
+    const contentOffset = fromRect.top - heroH;
     contentEl.style.transition = "none";
+    contentEl.style.transform  = `translateY(${contentOffset}px)`;
     contentEl.style.opacity    = "0";
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      /* Fly expands from card → hero bounds */
+      /* Fly expands card → hero bounds */
       flyEl.style.transition = [
         `top ${DUR}ms ${EASE}`,
         `left ${DUR}ms ${EASE}`,
@@ -78,27 +84,32 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
       flyEl.style.height       = `${heroH}px`;
       flyEl.style.borderRadius = "0";
 
-      /* Scrim fades out as image fills screen */
+      /* Card scrim fades out as image fills hero */
       scrimEl.style.transition = `opacity ${DUR}ms ${EASE}`;
       scrimEl.style.opacity    = "0";
 
-      /* Body slides to its natural position (below hero) */
-      bodyEl.style.transition = `transform ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}`;
-      bodyEl.style.transform  = "none";
+      /* Blend gradient fades in over the expanding image from the very start */
+      blendEl.style.transition = `opacity ${DUR}ms ${EASE}`;
+      blendEl.style.opacity    = "1";
+
+      /* Body background fades in at its natural position below hero */
+      bodyEl.style.transition = `opacity ${DUR}ms ${EASE}`;
       bodyEl.style.opacity    = "1";
 
-      /* Content fades in during the second half of the body slide */
-      const cDelay = Math.round(DUR * 0.35);
-      const cDur   = Math.round(DUR * 0.55);
-      contentEl.style.transition = `opacity ${cDur}ms ease ${cDelay}ms`;
+      /* Content slides down from card's Y into the body, slightly delayed */
+      const cDelay = Math.round(DUR * 0.15);
+      const cDur   = DUR - cDelay;
+      contentEl.style.transition = `transform ${cDur}ms ${EASE} ${cDelay}ms, opacity ${cDur}ms ease ${cDelay}ms`;
+      contentEl.style.transform  = "none";
       contentEl.style.opacity    = "1";
 
-      /* Once fly reaches hero: crossfade fly → real hero */
+      /* Crossfade fly → real hero once fly reaches bounds */
       setTimeout(() => {
         flyEl.style.transition  = "opacity 180ms ease";
         flyEl.style.opacity     = "0";
         heroEl.style.transition = "opacity 180ms ease";
         heroEl.style.opacity    = "1";
+        bodyEl.style.overflow   = ""; /* restore scrolling */
       }, DUR + 20);
     }));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -107,17 +118,18 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
   useEffect(() => {
     const flyEl     = flyRef.current;
     const scrimEl   = scrimRef.current;
+    const blendEl   = blendRef.current;
     const bodyEl    = bodyRef.current;
     const contentEl = contentRef.current;
     const heroEl    = heroRef.current;
-    if (!isClosing || !savedRect.current || !flyEl || !scrimEl || !bodyEl || !contentEl || !heroEl) return;
+    if (!isClosing || !savedRect.current || !flyEl || !scrimEl || !blendEl || !bodyEl || !contentEl || !heroEl) return;
 
-    const from     = savedRect.current;
-    const heroRect = heroEl.getBoundingClientRect();
-    const dur      = DUR - 50;
-    const bodyOffset = from.top - heroRect.height;
+    const from          = savedRect.current;
+    const heroRect      = heroEl.getBoundingClientRect();
+    const dur           = DUR - 50;
+    const contentOffset = from.top - heroRect.height;
 
-    /* Snap fly to hero position with scrim invisible; hide real hero */
+    /* Snap fly to hero position; hide real hero; scrim invisible */
     flyEl.style.transition   = "none";
     flyEl.style.top          = "0";
     flyEl.style.left         = "0";
@@ -132,9 +144,7 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
     heroEl.style.transition = "none";
     heroEl.style.opacity    = "0";
 
-    /* Content fades out immediately */
-    contentEl.style.transition = `opacity ${Math.round(dur * 0.3)}ms ease`;
-    contentEl.style.opacity    = "0";
+    bodyEl.style.overflow = "hidden";
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
       /* Fly shrinks back to card */
@@ -151,14 +161,22 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
       flyEl.style.height       = `${from.height}px`;
       flyEl.style.borderRadius = "16px";
 
-      /* Scrim fades back in so fly looks like the card by the time it returns */
+      /* Scrim fades back in so fly looks like the gallery card */
       scrimEl.style.transition = `opacity ${dur}ms ${EASE}`;
       scrimEl.style.opacity    = "1";
 
-      /* Body slides back to card position while fading out */
-      bodyEl.style.transition = `transform ${dur}ms ${EASE}, opacity ${dur}ms ${EASE}`;
-      bodyEl.style.transform  = `translateY(${bodyOffset}px)`;
+      /* Blend fades out so image is clean as fly shrinks */
+      blendEl.style.transition = `opacity ${dur}ms ${EASE}`;
+      blendEl.style.opacity    = "0";
+
+      /* Body fades out */
+      bodyEl.style.transition = `opacity ${dur}ms ${EASE}`;
       bodyEl.style.opacity    = "0";
+
+      /* Content slides back up toward card Y while fading */
+      contentEl.style.transition = `transform ${dur}ms ${EASE}, opacity ${Math.round(dur * 0.4)}ms ease`;
+      contentEl.style.transform  = `translateY(${contentOffset}px)`;
+      contentEl.style.opacity    = "0";
     }));
   }, [isClosing]);
 
@@ -167,7 +185,10 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
   return (
     <div className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}>
 
-      {/* Flying card — same image as gallery card; expands from card bounds to hero, then crossfades */}
+      {/* Blend gradient — fades in over the fly/hero from animation start */}
+      {useFlip && <div className="mdp-blend" ref={blendRef} />}
+
+      {/* Flying card — expands from card bounds to hero, then crossfades out */}
       {useFlip && (
         <div
           className="mdp-fly"
@@ -197,7 +218,7 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
         </button>
       </div>
 
-      {/* Body — slides up from card's Y position */}
+      {/* Body — fades in at natural position below hero */}
       <div className="mdp-body" ref={bodyRef}>
         <div className="mdp-content" ref={contentRef}>
           <div className="mdp-content-main">

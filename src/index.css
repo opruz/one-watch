@@ -1908,6 +1908,22 @@ input  { font-family: inherit; }
 
 .mdp--closing { pointer-events: none; }
 
+/* Blend gradient — sits above fly+hero (z:203), fades in from animation start so
+   the image→background transition is visible the whole time, not just at the end */
+.mdp-blend {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(300px, 54vh, 640px);
+  background: linear-gradient(to bottom, transparent 30%, var(--bg) 100%);
+  z-index: 203;
+  pointer-events: none;
+}
+
+/* In flip mode the blend handles the gradient; suppress the duplicate inside hero */
+.mdp.mdp--flip .mdp-hero-fade { display: none; }
+
 /* Flying card portal — same image as gallery card, animates from card→hero then crossfades */
 .mdp-fly {
   position: fixed;
