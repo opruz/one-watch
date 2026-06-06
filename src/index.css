@@ -874,6 +874,10 @@ input  { font-family: inherit; }
   max-width: none;
 }
 
+.fm-gallery-slot--detail-open .fm-gallery-panel {
+  opacity: 0;
+}
+
 .fm-gallery-backdrop {
   position: fixed;
   inset: 0;
@@ -1906,23 +1910,11 @@ input  { font-family: inherit; }
   pointer-events: auto;
 }
 
-.mdp--closing { pointer-events: none; }
-
-/* Blend gradient — sits above fly+hero (z:203), fades in from animation start so
-   the image→background transition is visible the whole time, not just at the end */
-.mdp-blend {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: clamp(300px, 54vh, 640px);
-  background: linear-gradient(to bottom, transparent 30%, var(--bg) 100%);
-  z-index: 203;
-  pointer-events: none;
+.mdp.mdp--flip {
+  background: var(--bg);
 }
 
-/* In flip mode the blend handles the gradient; suppress the duplicate inside hero */
-.mdp.mdp--flip .mdp-hero-fade { display: none; }
+.mdp--closing { pointer-events: none; }
 
 /* Flying card portal — same image as gallery card, animates from card→hero then crossfades */
 .mdp-fly {
@@ -1931,56 +1923,138 @@ input  { font-family: inherit; }
   background-size: cover;
   background-position: center;
   pointer-events: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .mdp-fly-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(8,8,16,0.85) 0%, rgba(8,8,16,0.4) 28%, transparent 55%);
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.08) 0%,
+    rgba(0,0,0,0.0) 35%,
+    rgba(0,0,0,0.75) 100%
+  );
   pointer-events: none;
 }
 
-/* Hero — position: fixed so it is never clipped by a scroll container */
-.mdp-hero {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: clamp(300px, 54vh, 640px);
-  z-index: 201;
-  overflow: hidden;
-  will-change: opacity;
+.mdp-fly-scrim--photo {
+  background:
+    linear-gradient(
+      to right,
+      rgba(0,0,0,0.80) 0%,
+      rgba(0,0,0,0.70) 25%,
+      rgba(0,0,0,0.35) 42%,
+      transparent 50%
+    ),
+    linear-gradient(
+      to top,
+      rgba(0,0,0,0.55) 0%,
+      rgba(0,0,0,0.15) 28%,
+      transparent 52%
+    );
 }
 
-/* Body — scrollable page content, starts below hero */
-.mdp-body {
-  position: fixed;
-  top: clamp(300px, 54vh, 640px);
+/* Detail gradient inside the expanding fly */
+.mdp-fly-hero-fade {
+  position: absolute;
+  bottom: 0;
   left: 0;
   right: 0;
+  height: 72%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(8, 8, 16, 0.35) 42%,
+    var(--bg) 92%,
+    var(--bg) 100%
+  );
+  pointer-events: none;
+  will-change: opacity, transform;
+  transform-origin: bottom center;
+}
+
+.mdp-fly-hero-fade::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 8px;
+  background: var(--bg);
+}
+
+.mdp-hero-fade {
+  position: absolute;
   bottom: 0;
-  z-index: 200;
+  left: 0;
+  right: 0;
+  height: 72%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(8, 8, 16, 0.35) 42%,
+    var(--bg) 92%,
+    var(--bg) 100%
+  );
+  pointer-events: none;
+}
+
+.mdp-hero-fade::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 8px;
+  background: var(--bg);
+}
+
+/* Fly text — fixed layer, inline top/left/width from click rects on first paint */
+.mdp-fly-text {
+  position: fixed;
+  z-index: 204;
+  pointer-events: none;
+  will-change: top, left, width;
+}
+
+.mdp-fly-text-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+/* Hero — scrolls with page content */
+.mdp-hero {
+  position: relative;
+  height: clamp(300px, 54vh, 640px);
+  flex-shrink: 0;
+  overflow: visible;
+  will-change: opacity;
+  z-index: 1;
+}
+
+/* Single scroll container for hero + page content */
+.mdp-scroll {
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg);
   scrollbar-width: none;
-  /* fallback animation when no FLIP rect */
   animation: mdp-enter 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-.mdp-body::-webkit-scrollbar { display: none; }
+.mdp-scroll::-webkit-scrollbar { display: none; }
 
-.mdp--closing .mdp-body {
+.mdp--closing .mdp-scroll {
   animation: mdp-exit 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Suppress fallback CSS animations when JS FLIP is running */
-.mdp.mdp--flip .mdp-body,
-.mdp.mdp--flip.mdp--closing .mdp-body {
+.mdp.mdp--flip .mdp-scroll,
+.mdp.mdp--flip.mdp--closing .mdp-scroll {
   animation: none;
 }
 .mdp.mdp--flip .mdp-hero-bg {
-  animation: none;
-}
-.mdp.mdp--flip .mdp-content {
   animation: none;
 }
 
@@ -1989,7 +2063,6 @@ input  { font-family: inherit; }
   inset: 0;
   background-size: cover;
   background-position: center;
-  /* no animation — hero expansion is handled by JS FLIP on the parent */
 }
 
 .mdp-hero-glow {
@@ -1998,17 +2071,8 @@ input  { font-family: inherit; }
   pointer-events: none;
 }
 
-/* Gradient that fades the hero into the page background — no left scrim */
-.mdp-hero-fade {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 60%;
-  background: linear-gradient(to bottom, transparent 0%, var(--bg) 100%);
-  pointer-events: none;
-}
-
 .mdp-back {
-  position: absolute;
+  position: fixed;
   top: 1.2rem;
   left: 1.2rem;
   display: flex;
@@ -2025,99 +2089,273 @@ input  { font-family: inherit; }
   padding: 0.38rem 0.72rem;
   cursor: pointer;
   transition: background 0.15s;
-  z-index: 1;
+  z-index: 205;
 }
 .mdp-back:hover { background: rgba(0,0,0,0.62); }
 
-/* Content */
-.mdp-content {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1.5rem 2rem 5rem;
+/* Page content — overlaps bottom of hero image */
+.mdp-page {
+  max-width: 1120px;
+  margin: -7rem auto 0;
+  padding: 0 2rem 5rem;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
-.mdp-content-main {
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
-}
-
-.mdp-content-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.mdp-logo {
-  max-width: 240px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.mdp-title {
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-
-.mdp-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-
-.mdp-meta {
-  font-size: 0.74rem;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 0.02em;
-}
-
-.mdp-desc {
-  font-size: 0.92rem;
-  color: rgba(255,255,255,0.88);
-  line-height: 1.65;
-}
-
-.mdp-why {
-  font-size: 0.88rem;
-  color: rgba(255,255,255,0.48);
-  font-style: italic;
-  line-height: 1.55;
-}
-
-.mdp-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  margin-top: 0.3rem;
-}
-
-.mdp-watch {
-  display: flex;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-}
-
-.mdp-btns {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
+.mdp-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 260px;
+  gap: 32px;
+  align-items: start;
 }
 
 .mdp-poster {
-  width: 116px;
+  width: 132px;
   flex-shrink: 0;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 14px 40px rgba(0,0,0,0.6);
-  margin-top: 0.3rem;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
 }
 
 .mdp-poster img {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.mdp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.mdp-info-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.mdp.mdp--flip .mdp-info-text {
+  visibility: hidden;
+}
+
+.mdp.mdp--flip .mdp-info-text--settled {
+  visibility: visible;
+}
+
+.mdp.mdp--flip .mdp-deferred {
+  opacity: 0;
+}
+
+.mdp-info-text .fm-gallery-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mdp-info-text--settled .fm-gallery-desc {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+}
+
+.mdp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mdp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.52rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-lift);
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.mdp-pill:hover { background: var(--bg-high); }
+
+.mdp-pill--primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #0a0a10;
+}
+
+.mdp-pill--primary:hover {
+  filter: brightness(1.06);
+  background: var(--accent);
+}
+
+.mdp-pill--saved {
+  border-color: rgba(232, 196, 122, 0.45);
+  color: var(--accent);
+}
+
+/* Reviews + cast sidebar */
+.mdp-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.mdp-section-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+  margin-bottom: 0.55rem;
+}
+
+.mdp-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mdp-review-score {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.mdp-review-count {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.42);
+  margin-bottom: 0.35rem;
+}
+
+.mdp-review-quote {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+  font-style: italic;
+  border-left: 2px solid rgba(232, 196, 122, 0.35);
+  padding-left: 0.75rem;
+  margin: 0;
+}
+
+.mdp-cast-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mdp-cast-list li {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.35;
+}
+
+/* Collections + footer actions */
+.mdp-reveal {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.mdp-collections-sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.42);
+  margin: -0.25rem 0 1rem;
+}
+
+.mdp-collection-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.mdp-collection-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-width: 168px;
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-lift);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: left;
+}
+
+.mdp-collection-card:hover {
+  background: var(--bg-high);
+  border-color: var(--border-md);
+}
+
+.mdp-collection-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mdp-collection-count {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.mdp-skip-link {
+  margin-top: 1.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.38);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mdp-skip-link:hover { color: rgba(255, 255, 255, 0.6); }
+
+@media (max-width: 860px) {
+  .mdp-main {
+    grid-template-columns: auto 1fr;
+  }
+
+  .mdp-aside {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 2rem;
+  }
+
+  .mdp-reviews,
+  .mdp-cast {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .mdp-main {
+    grid-template-columns: 1fr;
+  }
+
+  .mdp-poster {
+    width: 108px;
+  }
+
+  .mdp-aside {
+    flex-direction: column;
+  }
 }
