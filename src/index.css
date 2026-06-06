@@ -2097,7 +2097,7 @@ input  { font-family: inherit; }
 /* Page content — overlaps bottom of hero image */
 .mdp-page {
   max-width: 1120px;
-  margin: -7rem auto 0;
+  margin: -10rem auto 0;
   padding: 0 2rem 5rem;
   position: relative;
   z-index: 2;
