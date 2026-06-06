@@ -1989,12 +1989,13 @@ input  { font-family: inherit; }
   bottom: 0;
   left: 0;
   right: 0;
-  height: 72%;
+  height: 90%;
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(8, 8, 16, 0.35) 42%,
-    var(--bg) 92%,
+    rgba(8, 8, 16, 0.25) 28%,
+    rgba(8, 8, 16, 0.7) 58%,
+    var(--bg) 86%,
     var(--bg) 100%
   );
   pointer-events: none;
