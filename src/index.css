@@ -7,8 +7,8 @@
   --bg-card:   rgba(255,255,255,0.04);
   --bg-lift:   rgba(255,255,255,0.07);
   --bg-high:   rgba(255,255,255,0.12);
-  --accent:    #FFB62E;
-  --accent-hov:#ffc94a;
+  --accent:    #7CC3FF;
+  --accent-hov:#a0d4ff;
   --text:      #f0f0f8;
   --sub:       #9090b0;
   --muted:     #55557a;
@@ -2251,39 +2251,58 @@ input  { font-family: inherit; }
 
 /* ===================================================================
    ETHEREAL GLASS DESIGN SYSTEM  (leonxlnx/soft-skill)
-   Vibe: Ethereal Glass — OLED black, ambient mesh orbs, white/8
-   hairline borders, inset highlights, backdrop-blur on fixed only.
+   Vibe: Ethereal Glass — OLED black, white/8 hairline borders,
+   inset highlights, backdrop-blur on fixed only.
    Double-Bezel (Doppelrand) on all card-like surfaces.
-   State hierarchy: resting < hover < active/selected (significantly brighter).
+   State hierarchy: resting < hover < active (light blue, significantly brighter).
 =================================================================== */
 
-/* ── Ambient mesh orbs (body, position:fixed, GPU-safe) ── */
-body::before {
+/* Clean dark backgrounds — no ambient orbs */
+.fm-results-overlay { background: var(--bg); }
+.mdp-scroll         { background: var(--bg); }
+
+/* ── Questionnaire top gradient — white → light blue → dark blue ── */
+/* Concave bottom edge: a bg-colored ellipse bites into the bottom    */
+.fm-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.fm-page::before {
   content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 260px;
+  background:
+    linear-gradient(to bottom, rgba(9,9,11,0) 45%, rgba(9,9,11,0.95) 100%),
+    linear-gradient(90deg,
+      rgba(255,255,255,0.82) 0%,
+      rgba(124,195,255,0.72) 44%,
+      rgba(65,100,255,0.58) 100%
+    );
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 72% 52% at 12% 18%, rgba(254,98,55,0.11) 0%, transparent 55%),
-    radial-gradient(ellipse 58% 42% at 88% 78%, rgba(65,100,255,0.13) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 30% at 50% 48%, rgba(255,182,46,0.05) 0%, transparent 60%);
+  z-index: 0;
 }
 
-/* Overlay-specific orbs (overlay covers body::before, needs its own) */
-.fm-results-overlay {
-  background:
-    radial-gradient(ellipse 70% 50% at 18% 22%, rgba(254,98,55,0.09) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 40% at 82% 72%, rgba(65,100,255,0.11) 0%, transparent 55%),
-    var(--bg);
+/* Concave bottom edge — bg-colored oval covers the center-bottom of ::before */
+.fm-page::after {
+  content: "";
+  position: absolute;
+  top: 196px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 115%;
+  height: 80px;
+  background: var(--bg);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.mdp-scroll {
-  background:
-    radial-gradient(ellipse 65% 48% at 80% 15%, rgba(255,182,46,0.07) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 40% at 20% 80%, rgba(65,100,255,0.10) 0%, transparent 55%),
-    var(--bg);
-}
+/* questionnaire content above the gradient */
+.fm-wrap { position: relative; z-index: 2; }
 
 /* ── Sidebar — glass with backdrop-blur (fixed, performance-safe) ── */
 .sidebar {
@@ -2305,7 +2324,7 @@ body::before {
   color: var(--sub);
 }
 .side-link--active {
-  background: rgba(255,182,46,0.08);
+  background: rgba(124,195,255,0.08);
   color: var(--accent);
 }
 
@@ -2378,13 +2397,8 @@ body::before {
   border-color: var(--border-md);
 }
 
-/* ── Onboarding wrap — own ambient orbs ── */
-.ob-wrap {
-  background:
-    radial-gradient(ellipse 80% 55% at 25% 25%, rgba(255,182,46,0.09) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 45% at 75% 70%, rgba(65,100,255,0.11) 0%, transparent 55%),
-    var(--bg);
-}
+/* ── Onboarding wrap ── */
+.ob-wrap { background: var(--bg); }
 
 /* Platform buttons — Double-Bezel */
 .ob-platform-btn {
@@ -2401,25 +2415,25 @@ body::before {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
 }
 .ob-platform-btn--on {
-  background: rgba(255,182,46,0.10);
-  border-color: rgba(255,182,46,0.38);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 18px rgba(255,182,46,0.14);
+  background: rgba(124,195,255,0.12);
+  border-color: rgba(124,195,255,0.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 20px rgba(124,195,255,0.18);
   opacity: 1;
 }
 
-/* CTA — warm gradient pill */
+/* CTA — cool blue gradient pill */
 .ob-cta {
-  background: linear-gradient(135deg, rgba(255,182,46,0.22) 0%, rgba(254,98,55,0.18) 100%);
-  border: 1px solid rgba(255,182,46,0.38);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(255,182,46,0.14);
+  background: linear-gradient(135deg, rgba(124,195,255,0.22) 0%, rgba(65,100,255,0.18) 100%);
+  border: 1px solid rgba(124,195,255,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,195,255,0.14);
   backdrop-filter: blur(8px);
   transition: background 0.25s var(--ease), border-color 0.25s,
               box-shadow 0.25s, transform 0.15s var(--ease), opacity 0.15s;
 }
 .ob-cta:not(:disabled):hover {
-  background: linear-gradient(135deg, rgba(255,182,46,0.30) 0%, rgba(254,98,55,0.24) 100%);
-  border-color: rgba(255,182,46,0.55);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 32px rgba(255,182,46,0.22);
+  background: linear-gradient(135deg, rgba(124,195,255,0.30) 0%, rgba(65,100,255,0.24) 100%);
+  border-color: rgba(124,195,255,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 32px rgba(124,195,255,0.22);
 }
 
 /* ── Account Integration Modal ── */
@@ -2443,21 +2457,21 @@ body::before {
   transition: border-color 0.2s var(--ease), background 0.2s, color 0.2s;
 }
 .aim-connect-btn:hover:not(:disabled) {
-  background: rgba(255,182,46,0.08);
-  border-color: rgba(255,182,46,0.42);
+  background: rgba(124,195,255,0.08);
+  border-color: rgba(124,195,255,0.42);
   color: var(--accent);
 }
 .aim-spinner { border: 2px solid var(--border-md); border-top-color: var(--accent); }
 .aim-cta {
-  background: linear-gradient(135deg, rgba(255,182,46,0.22) 0%, rgba(254,98,55,0.18) 100%);
-  border: 1px solid rgba(255,182,46,0.38);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 20px rgba(255,182,46,0.14);
+  background: linear-gradient(135deg, rgba(124,195,255,0.22) 0%, rgba(65,100,255,0.18) 100%);
+  border: 1px solid rgba(124,195,255,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 20px rgba(124,195,255,0.14);
   backdrop-filter: blur(8px);
   transition: background 0.22s var(--ease), border-color 0.22s, box-shadow 0.22s;
 }
 .aim-cta:hover {
-  background: linear-gradient(135deg, rgba(255,182,46,0.30) 0%, rgba(254,98,55,0.24) 100%);
-  border-color: rgba(255,182,46,0.55);
+  background: linear-gradient(135deg, rgba(124,195,255,0.30) 0%, rgba(65,100,255,0.24) 100%);
+  border-color: rgba(124,195,255,0.55);
 }
 
 /* ── Focus Mode questionnaire options — Double-Bezel ── */
@@ -2473,15 +2487,15 @@ body::before {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
 }
 .fm-option--on {
-  background: rgba(255,182,46,0.10);
-  border-color: rgba(255,182,46,0.42);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.13), 0 0 16px rgba(255,182,46,0.13);
+  background: rgba(124,195,255,0.12);
+  border-color: rgba(124,195,255,0.44);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.13), 0 0 18px rgba(124,195,255,0.20), 0 0 36px rgba(124,195,255,0.08);
   color: var(--text);
 }
 .fm-option--any.fm-option--on {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.20);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
+  background: rgba(124,195,255,0.12);
+  border-color: rgba(124,195,255,0.44);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 0 18px rgba(124,195,255,0.20);
 }
 
 /* Avoid chips */
@@ -2496,31 +2510,31 @@ body::before {
   color: var(--sub);
 }
 .fm-avoid-chip--on {
-  background: rgba(255,182,46,0.10);
-  border-color: rgba(255,182,46,0.40);
+  background: rgba(124,195,255,0.12);
+  border-color: rgba(124,195,255,0.42);
   color: var(--accent);
-  box-shadow: 0 0 12px rgba(255,182,46,0.10);
+  box-shadow: 0 0 14px rgba(124,195,255,0.16);
 }
 
 /* Tags */
 .fm-tag {
-  background: rgba(255,182,46,0.10);
-  border: 1px solid rgba(255,182,46,0.22);
+  background: rgba(124,195,255,0.10);
+  border: 1px solid rgba(124,195,255,0.22);
 }
 
 /* FM CTA */
 .fm-cta {
-  background: linear-gradient(135deg, rgba(255,182,46,0.22) 0%, rgba(254,98,55,0.18) 100%);
-  border: 1px solid rgba(255,182,46,0.38);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(255,182,46,0.13);
+  background: linear-gradient(135deg, rgba(124,195,255,0.22) 0%, rgba(65,100,255,0.18) 100%);
+  border: 1px solid rgba(124,195,255,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,195,255,0.13);
   backdrop-filter: blur(8px);
   transition: background 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s,
               transform 0.15s var(--ease), opacity 0.15s;
 }
 .fm-cta:not(:disabled):hover {
-  background: linear-gradient(135deg, rgba(255,182,46,0.30) 0%, rgba(254,98,55,0.24) 100%);
-  border-color: rgba(255,182,46,0.55);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 32px rgba(255,182,46,0.22);
+  background: linear-gradient(135deg, rgba(124,195,255,0.30) 0%, rgba(65,100,255,0.24) 100%);
+  border-color: rgba(124,195,255,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 32px rgba(124,195,255,0.22);
 }
 
 /* ── Gallery card — Doppelrand outer shell ── */
@@ -2606,8 +2620,8 @@ body::before {
   border-color: var(--border-md);
 }
 .status-btn--active {
-  background: rgba(255,182,46,0.10);
-  border-color: rgba(255,182,46,0.38);
+  background: rgba(124,195,255,0.10);
+  border-color: rgba(124,195,255,0.38);
   color: var(--accent);
 }
 
@@ -2682,18 +2696,18 @@ body::before {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
 }
 .mdp-pill--primary {
-  background: linear-gradient(135deg, rgba(255,182,46,0.18) 0%, rgba(254,98,55,0.14) 100%);
-  border-color: rgba(255,182,46,0.38);
+  background: linear-gradient(135deg, rgba(124,195,255,0.18) 0%, rgba(65,100,255,0.14) 100%);
+  border-color: rgba(124,195,255,0.38);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .mdp-pill--primary:hover {
-  background: linear-gradient(135deg, rgba(255,182,46,0.26) 0%, rgba(254,98,55,0.20) 100%);
-  border-color: rgba(255,182,46,0.55);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 0 18px rgba(255,182,46,0.18);
+  background: linear-gradient(135deg, rgba(124,195,255,0.26) 0%, rgba(65,100,255,0.20) 100%);
+  border-color: rgba(124,195,255,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 0 18px rgba(124,195,255,0.18);
 }
 .mdp-pill--saved {
-  background: rgba(255,182,46,0.08);
-  border-color: rgba(255,182,46,0.38);
+  background: rgba(124,195,255,0.08);
+  border-color: rgba(124,195,255,0.38);
 }
 
 /* MDP back button — glass pill */
@@ -2725,7 +2739,7 @@ body::before {
 
 /* MDP review quote accent border */
 .mdp-review-quote {
-  border-left: 2px solid rgba(255,182,46,0.38);
+  border-left: 2px solid rgba(124,195,255,0.38);
 }
 
 /* MDP section divider */
@@ -2771,8 +2785,8 @@ body::before {
   border-color: var(--border-md);
 }
 .fm-save-btn--saved {
-  background: rgba(255,182,46,0.08);
-  border-color: rgba(255,182,46,0.38);
+  background: rgba(124,195,255,0.08);
+  border-color: rgba(124,195,255,0.38);
 }
 
 /* ── Sidebar divider ── */
