@@ -2276,26 +2276,26 @@ input  { font-family: inherit; }
   right: 0;
   height: 300px;
   background: linear-gradient(to bottom,
-    rgba(255,255,255,0.32) 0%,
-    rgba(124,195,255,0.86) 8%,
-    rgba(124,195,255,0.76) 44%,
-    rgba(65,100,255,0.46) 64%,
-    rgba(65,100,255,0.12) 82%,
-    rgba(65,100,255,0)    100%
+    rgba(255,255,255,0.90) 0%,
+    rgba(124,195,255,1.00) 6%,
+    rgba(124,195,255,0.95) 50%,
+    rgba(65,100,255,0.85)  72%
   );
+  -webkit-mask-image: linear-gradient(to bottom, black 46%, transparent 90%);
+  mask-image:         linear-gradient(to bottom, black 46%, transparent 90%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Concave bottom edge — bg-colored oval covers only the fully-transparent tail */
+/* Concave bottom edge — slightly narrowed oval, sits right at the mask's fade zone */
 .fm-page::after {
   content: "";
   position: absolute;
-  top: 232px;
+  top: 210px;
   left: 50%;
   transform: translateX(-50%);
-  width: 115%;
-  height: 80px;
+  width: 110%;
+  height: 100px;
   background: var(--bg);
   border-radius: 50% 50% 0 0 / 100% 100% 0 0;
   pointer-events: none;
