@@ -4,22 +4,37 @@
 /* ===== ONE WATCH DESIGN TOKENS ===== */
 :root {
   --bg:        #09090b;
-  --bg-card:   transparent;
-  --bg-lift:   transparent;
-  --bg-high:   transparent;
-  --accent:    #e8c47a;
-  --accent-hov:#f5d48e;
+  --bg-card:   rgba(255,255,255,0.04);
+  --bg-lift:   rgba(255,255,255,0.07);
+  --bg-high:   rgba(255,255,255,0.12);
+  --accent:    #FFB62E;
+  --accent-hov:#ffc94a;
   --text:      #f0f0f8;
   --sub:       #9090b0;
   --muted:     #55557a;
-  --border:    transparent;
-  --border-md: transparent;
+  --border:    rgba(255,255,255,0.08);
+  --border-md: rgba(255,255,255,0.16);
   --green:     #22d069;
   --r:         16px;
   --r-sm:      10px;
   --r-xs:      7px;
   --sidebar-w:      224px;
   --sidebar-icon-w: 64px;
+
+  /* Skill palette */
+  --red:       #FE6237;
+  --yellow:    #FFB62E;
+  --blue-lt:   #7CC3FF;
+  --blue-dk:   #4164FF;
+
+  /* Glow tokens */
+  --glow-warm: rgba(255,182,46,0.18);
+  --glow-red:  rgba(254,98,55,0.18);
+  --glow-cool: rgba(124,195,255,0.14);
+  --glow-blue: rgba(65,100,255,0.16);
+
+  --ease:      cubic-bezier(0.32,0.72,0,1);
+  --ease-out:  cubic-bezier(0.4,0,0.2,1);
 }
 
 /* ===== BASE ===== */
@@ -2233,4 +2248,543 @@ input  { font-family: inherit; }
     flex-direction: column;
   }
 }
+
+/* ===================================================================
+   ETHEREAL GLASS DESIGN SYSTEM  (leonxlnx/soft-skill)
+   Vibe: Ethereal Glass — OLED black, ambient mesh orbs, white/8
+   hairline borders, inset highlights, backdrop-blur on fixed only.
+   Double-Bezel (Doppelrand) on all card-like surfaces.
+   State hierarchy: resting < hover < active/selected (significantly brighter).
+=================================================================== */
+
+/* ── Ambient mesh orbs (body, position:fixed, GPU-safe) ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 72% 52% at 12% 18%, rgba(254,98,55,0.11) 0%, transparent 55%),
+    radial-gradient(ellipse 58% 42% at 88% 78%, rgba(65,100,255,0.13) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 30% at 50% 48%, rgba(255,182,46,0.05) 0%, transparent 60%);
+}
+
+/* Overlay-specific orbs (overlay covers body::before, needs its own) */
+.fm-results-overlay {
+  background:
+    radial-gradient(ellipse 70% 50% at 18% 22%, rgba(254,98,55,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 82% 72%, rgba(65,100,255,0.11) 0%, transparent 55%),
+    var(--bg);
+}
+
+.mdp-scroll {
+  background:
+    radial-gradient(ellipse 65% 48% at 80% 15%, rgba(255,182,46,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 20% 80%, rgba(65,100,255,0.10) 0%, transparent 55%),
+    var(--bg);
+}
+
+/* ── Sidebar — glass with backdrop-blur (fixed, performance-safe) ── */
+.sidebar {
+  background: rgba(9,9,11,0.72);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.sidebar:hover {
+  background: rgba(9,9,11,0.82);
+}
+
+/* sidebar nav links */
+.side-link {
+  transition: background 0.22s var(--ease-out), color 0.22s;
+}
+.side-link:hover {
+  background: var(--bg-card);
+  color: var(--sub);
+}
+.side-link--active {
+  background: rgba(255,182,46,0.08);
+  color: var(--accent);
+}
+
+/* watchlist mini-cards */
+.mini-card {
+  background: var(--bg-card);
+  border: 1px solid transparent;
+  transition: background 0.2s var(--ease-out), border-color 0.2s;
+}
+.mini-card:hover {
+  background: var(--bg-lift);
+  border-color: var(--border);
+}
+
+/* ── Topbar — glass sticky (performance-safe backdrop-blur) ── */
+.topbar {
+  background: rgba(9,9,11,0.70);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Mode toggle */
+.mode-toggle {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+.mode-btn {
+  transition: background 0.2s var(--ease-out), color 0.2s;
+}
+.mode-btn--active {
+  background: rgba(255,255,255,0.10);
+  color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.mode-btn:not(.mode-btn--active):hover {
+  color: var(--sub);
+}
+
+/* Search */
+.search {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s var(--ease-out), background 0.2s var(--ease-out);
+}
+.search:focus {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+}
+
+/* Icon buttons + profile pill */
+.topbar__icon-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: background 0.2s var(--ease-out), border-color 0.2s, color 0.2s;
+}
+.topbar__icon-btn:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  color: var(--text);
+}
+
+.topbar__profile {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: background 0.2s var(--ease-out), border-color 0.2s;
+}
+.topbar__profile:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+}
+
+/* ── Onboarding wrap — own ambient orbs ── */
+.ob-wrap {
+  background:
+    radial-gradient(ellipse 80% 55% at 25% 25%, rgba(255,182,46,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 45% at 75% 70%, rgba(65,100,255,0.11) 0%, transparent 55%),
+    var(--bg);
+}
+
+/* Platform buttons — Double-Bezel */
+.ob-platform-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: background 0.22s var(--ease), border-color 0.22s var(--ease),
+              transform 0.15s var(--ease), box-shadow 0.22s, opacity 0.15s;
+}
+.ob-platform-btn:hover:not(.ob-platform-btn--on) {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  opacity: 1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.ob-platform-btn--on {
+  background: rgba(255,182,46,0.10);
+  border-color: rgba(255,182,46,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 18px rgba(255,182,46,0.14);
+  opacity: 1;
+}
+
+/* CTA — warm gradient pill */
+.ob-cta {
+  background: linear-gradient(135deg, rgba(255,182,46,0.22) 0%, rgba(254,98,55,0.18) 100%);
+  border: 1px solid rgba(255,182,46,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(255,182,46,0.14);
+  backdrop-filter: blur(8px);
+  transition: background 0.25s var(--ease), border-color 0.25s,
+              box-shadow 0.25s, transform 0.15s var(--ease), opacity 0.15s;
+}
+.ob-cta:not(:disabled):hover {
+  background: linear-gradient(135deg, rgba(255,182,46,0.30) 0%, rgba(254,98,55,0.24) 100%);
+  border-color: rgba(255,182,46,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 32px rgba(255,182,46,0.22);
+}
+
+/* ── Account Integration Modal ── */
+.aim-overlay {
+  background: rgba(0,0,0,0.58);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.aim-modal {
+  background: rgba(11,11,17,0.90);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 88px rgba(0,0,0,0.65);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+.aim-list { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.aim-row { border-bottom: 1px solid var(--border); }
+.aim-connect-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s var(--ease), background 0.2s, color 0.2s;
+}
+.aim-connect-btn:hover:not(:disabled) {
+  background: rgba(255,182,46,0.08);
+  border-color: rgba(255,182,46,0.42);
+  color: var(--accent);
+}
+.aim-spinner { border: 2px solid var(--border-md); border-top-color: var(--accent); }
+.aim-cta {
+  background: linear-gradient(135deg, rgba(255,182,46,0.22) 0%, rgba(254,98,55,0.18) 100%);
+  border: 1px solid rgba(255,182,46,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 20px rgba(255,182,46,0.14);
+  backdrop-filter: blur(8px);
+  transition: background 0.22s var(--ease), border-color 0.22s, box-shadow 0.22s;
+}
+.aim-cta:hover {
+  background: linear-gradient(135deg, rgba(255,182,46,0.30) 0%, rgba(254,98,55,0.24) 100%);
+  border-color: rgba(255,182,46,0.55);
+}
+
+/* ── Focus Mode questionnaire options — Double-Bezel ── */
+.fm-option {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: background 0.22s var(--ease), border-color 0.22s var(--ease), box-shadow 0.22s, color 0.2s;
+}
+.fm-option:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.fm-option--on {
+  background: rgba(255,182,46,0.10);
+  border-color: rgba(255,182,46,0.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.13), 0 0 16px rgba(255,182,46,0.13);
+  color: var(--text);
+}
+.fm-option--any.fm-option--on {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+/* Avoid chips */
+.fm-avoid-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: background 0.2s var(--ease), border-color 0.2s, color 0.2s;
+}
+.fm-avoid-chip:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  color: var(--sub);
+}
+.fm-avoid-chip--on {
+  background: rgba(255,182,46,0.10);
+  border-color: rgba(255,182,46,0.40);
+  color: var(--accent);
+  box-shadow: 0 0 12px rgba(255,182,46,0.10);
+}
+
+/* Tags */
+.fm-tag {
+  background: rgba(255,182,46,0.10);
+  border: 1px solid rgba(255,182,46,0.22);
+}
+
+/* FM CTA */
+.fm-cta {
+  background: linear-gradient(135deg, rgba(255,182,46,0.22) 0%, rgba(254,98,55,0.18) 100%);
+  border: 1px solid rgba(255,182,46,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(255,182,46,0.13);
+  backdrop-filter: blur(8px);
+  transition: background 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s,
+              transform 0.15s var(--ease), opacity 0.15s;
+}
+.fm-cta:not(:disabled):hover {
+  background: linear-gradient(135deg, rgba(255,182,46,0.30) 0%, rgba(254,98,55,0.24) 100%);
+  border-color: rgba(255,182,46,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 32px rgba(255,182,46,0.22);
+}
+
+/* ── Gallery card — Doppelrand outer shell ── */
+.fm-gallery-card {
+  outline: 1px solid rgba(255,255,255,0.10);
+  outline-offset: -1px;
+  box-shadow: 0 4px 2px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.55);
+  transition: transform 0.45s var(--ease),
+              filter 0.45s var(--ease-out),
+              opacity 0.45s var(--ease-out),
+              outline-color 0.22s,
+              box-shadow 0.3s;
+}
+.fm-gallery-card--active {
+  outline-color: rgba(255,255,255,0.20);
+  box-shadow: 0 6px 4px rgba(0,0,0,0.35), 0 20px 70px rgba(0,0,0,0.6);
+}
+
+/* Gallery dim (inactive card overlay) */
+.fm-gallery-dim {
+  background: rgba(9,9,11,0.30);
+}
+
+/* Gallery skeleton */
+.fm-gallery-skeleton { background: rgba(255,255,255,0.04); }
+
+/* ── Genre chips ── */
+.genre-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: background 0.2s var(--ease), border-color 0.2s, color 0.2s;
+}
+.genre-chip:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  color: var(--sub);
+}
+.genre-chip--active {
+  background: rgba(124,195,255,0.10);
+  border-color: rgba(124,195,255,0.38);
+  color: var(--text);
+  box-shadow: 0 0 14px rgba(124,195,255,0.10);
+}
+
+/* Genres scroll btn */
+.genres-scroll-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: background 0.2s var(--ease), border-color 0.2s, color 0.2s;
+}
+.genres-scroll-btn:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  color: var(--sub);
+}
+
+/* ── Filter chips ── */
+.chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: background 0.2s var(--ease), border-color 0.2s, color 0.2s;
+}
+.chip:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  color: var(--sub);
+}
+.chip--active {
+  background: rgba(124,195,255,0.10);
+  border-color: rgba(124,195,255,0.38);
+  color: var(--text);
+  box-shadow: 0 0 12px rgba(124,195,255,0.10);
+}
+
+/* Status buttons */
+.status-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: all 0.2s var(--ease);
+}
+.status-btn:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+}
+.status-btn--active {
+  background: rgba(255,182,46,0.10);
+  border-color: rgba(255,182,46,0.38);
+  color: var(--accent);
+}
+
+/* ── Filter + Platforms panels ── */
+.filter-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.platforms {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* ── Title cards — Double-Bezel ── */
+.title-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: border-color 0.22s var(--ease), transform 0.22s var(--ease),
+              background 0.22s, box-shadow 0.22s;
+}
+.title-card:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 8px 28px rgba(0,0,0,0.4);
+}
+
+/* Hero side cards */
+.hero__side-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: transform 0.22s var(--ease), border-color 0.22s, background 0.22s;
+}
+.hero__side-card:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+}
+
+/* Hero tag */
+.hero__tag {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* Hero play button */
+.hero__play-btn {
+  background: rgba(255,255,255,0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.20);
+}
+.hero__play-btn:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+/* Provider badge */
+.provider-badge {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+/* ── Movie Detail Page pills (action buttons) ── */
+.mdp-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: background 0.2s var(--ease), border-color 0.2s, box-shadow 0.2s;
+}
+.mdp-pill:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.mdp-pill--primary {
+  background: linear-gradient(135deg, rgba(255,182,46,0.18) 0%, rgba(254,98,55,0.14) 100%);
+  border-color: rgba(255,182,46,0.38);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.mdp-pill--primary:hover {
+  background: linear-gradient(135deg, rgba(255,182,46,0.26) 0%, rgba(254,98,55,0.20) 100%);
+  border-color: rgba(255,182,46,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 0 18px rgba(255,182,46,0.18);
+}
+.mdp-pill--saved {
+  background: rgba(255,182,46,0.08);
+  border-color: rgba(255,182,46,0.38);
+}
+
+/* MDP back button — glass pill */
+.mdp-back {
+  background: rgba(9,9,11,0.52);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: background 0.2s var(--ease), border-color 0.2s;
+}
+.mdp-back:hover {
+  background: rgba(9,9,11,0.72);
+  border-color: var(--border-md);
+}
+
+/* MDP collection cards */
+.mdp-collection-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: background 0.2s var(--ease), border-color 0.2s, box-shadow 0.2s;
+}
+.mdp-collection-card:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.09);
+}
+
+/* MDP review quote accent border */
+.mdp-review-quote {
+  border-left: 2px solid rgba(255,182,46,0.38);
+}
+
+/* MDP section divider */
+.mdp-reveal {
+  border-top: 1px solid var(--border);
+}
+
+/* ── Modal — glass panel ── */
+.modal-backdrop {
+  background: rgba(0,0,0,0.58);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.modal {
+  background: rgba(11,11,17,0.90);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 88px rgba(0,0,0,0.65);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+/* ── FM sheet modal ── */
+.fm-overlay {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.fm-sheet {
+  background: rgba(10,10,16,0.92);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 -8px 52px rgba(0,0,0,0.55);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+.fm-save-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: background 0.2s var(--ease), border-color 0.2s;
+}
+.fm-save-btn:hover {
+  background: var(--bg-lift);
+  border-color: var(--border-md);
+}
+.fm-save-btn--saved {
+  background: rgba(255,182,46,0.08);
+  border-color: rgba(255,182,46,0.38);
+}
+
+/* ── Sidebar divider ── */
+.sidebar__divider { background: var(--border); }
+
+/* ── Empty state ── */
+.empty-state {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+}
+
+/* ── Hero dots ── */
+.hero__dot { background: rgba(255,255,255,0.22); }
+.hero__dot--active { background: var(--accent); }
 
