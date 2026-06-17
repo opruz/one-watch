@@ -2427,7 +2427,6 @@ input  { font-family: inherit; }
   background: linear-gradient(135deg, rgba(124,195,255,0.22) 0%, rgba(65,100,255,0.18) 100%);
   border: 1px solid rgba(124,195,255,0.38);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,195,255,0.14);
-  backdrop-filter: blur(8px);
   transition: background 0.25s var(--ease), border-color 0.25s,
               box-shadow 0.25s, transform 0.15s var(--ease), opacity 0.15s;
 }
@@ -2467,7 +2466,6 @@ input  { font-family: inherit; }
   background: linear-gradient(135deg, rgba(124,195,255,0.22) 0%, rgba(65,100,255,0.18) 100%);
   border: 1px solid rgba(124,195,255,0.38);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 20px rgba(124,195,255,0.14);
-  backdrop-filter: blur(8px);
   transition: background 0.22s var(--ease), border-color 0.22s, box-shadow 0.22s;
 }
 .aim-cta:hover {
@@ -2528,7 +2526,6 @@ input  { font-family: inherit; }
   background: linear-gradient(135deg, rgba(124,195,255,0.22) 0%, rgba(65,100,255,0.18) 100%);
   border: 1px solid rgba(124,195,255,0.38);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,195,255,0.13);
-  backdrop-filter: blur(8px);
   transition: background 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s,
               transform 0.15s var(--ease), opacity 0.15s;
 }
