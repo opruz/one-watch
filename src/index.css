@@ -2276,20 +2276,22 @@ input  { font-family: inherit; }
   right: 0;
   height: 300px;
   background: linear-gradient(to bottom,
-    rgba(255,255,255,0.88) 0%,
-    rgba(124,195,255,0.68) 38%,
-    rgba(65,100,255,0.38) 65%,
-    rgba(65,100,255,0) 100%
+    rgba(255,255,255,0.32) 0%,
+    rgba(124,195,255,0.86) 8%,
+    rgba(124,195,255,0.76) 44%,
+    rgba(65,100,255,0.46) 64%,
+    rgba(65,100,255,0.12) 82%,
+    rgba(65,100,255,0)    100%
   );
   pointer-events: none;
   z-index: 0;
 }
 
-/* Concave bottom edge — bg-colored oval covers the center-bottom of ::before */
+/* Concave bottom edge — bg-colored oval covers only the fully-transparent tail */
 .fm-page::after {
   content: "";
   position: absolute;
-  top: 196px;
+  top: 232px;
   left: 50%;
   transform: translateX(-50%);
   width: 115%;
