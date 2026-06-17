@@ -371,7 +371,10 @@ input  { font-family: inherit; }
   justify-content: center;
   padding: 2.5rem 1.5rem;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232,196,122,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 18% 28%, rgba(254,98,55,0.09) 0%, transparent 58%),
+    radial-gradient(ellipse 45% 35% at 82% 70%, rgba(255,182,46,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 38% at 75% 15%, rgba(65,100,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 25% 82%, rgba(124,195,255,0.06) 0%, transparent 52%),
     var(--bg);
   overflow-y: auto;
 }
@@ -1881,6 +1884,14 @@ input  { font-family: inherit; }
 .modal__provider-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1rem; }
 .modal__watch { width: 100%; padding: 0.65rem; }
 
+/* ===== GLASSMORPHISM DESIGN TOKENS ===== */
+:root {
+  --glass-red:    #FE6237;
+  --glass-yellow: #FFB62E;
+  --glass-lblue:  #7CC3FF;
+  --glass-dblue:  #4164FF;
+}
+
 /* ===== MOVIE DETAIL PAGE ===== */
 @keyframes mdp-enter {
   from { opacity: 0; }
@@ -2359,4 +2370,199 @@ input  { font-family: inherit; }
   .mdp-aside {
     flex-direction: column;
   }
+}
+
+/* ===== GLASSMORPHISM CARD TREATMENT =====
+   Technique: gradient border via background-clip
+     layer 1 (padding-box) = dark glass fill
+     layer 2 (border-box)  = colorful gradient visible through transparent border
+   ========================================= */
+
+/* ── Ambient light sources on page backgrounds ── */
+.main {
+  background:
+    radial-gradient(ellipse 60% 35% at 15% 20%, rgba(254,98,55,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 30% at 85% 75%, rgba(65,100,255,0.06) 0%, transparent 52%),
+    radial-gradient(ellipse 45% 28% at 80% 10%, rgba(255,182,46,0.04) 0%, transparent 50%);
+}
+
+/* ── Platform buttons (onboarding) · red + yellow ── */
+.ob-platform-btn {
+  background:
+    linear-gradient(rgba(8,8,16,0.58), rgba(8,8,16,0.58)) padding-box,
+    linear-gradient(135deg, rgba(254,98,55,0.55) 0%, rgba(255,182,46,0.55) 100%) border-box;
+  border: 1.5px solid transparent;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 6px 22px rgba(0,0,0,0.45);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.ob-platform-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 100% 80% at 15% 15%, rgba(254,98,55,0.13) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 65% at 88% 85%, rgba(255,182,46,0.10) 0%, transparent 55%);
+  pointer-events: none;
+}
+.ob-platform-btn--on {
+  background:
+    linear-gradient(rgba(8,8,16,0.52), rgba(8,8,16,0.52)) padding-box,
+    linear-gradient(135deg, var(--glass-red) 0%, var(--glass-yellow) 100%) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.11),
+    0 0 18px rgba(254,98,55,0.28),
+    0 0 48px rgba(255,182,46,0.12),
+    0 6px 22px rgba(0,0,0,0.45);
+}
+.ob-platform-btn:hover:not(.ob-platform-btn--on) {
+  background:
+    linear-gradient(rgba(8,8,16,0.50), rgba(8,8,16,0.50)) padding-box,
+    linear-gradient(135deg, rgba(254,98,55,0.80) 0%, rgba(255,182,46,0.80) 100%) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    0 0 12px rgba(254,98,55,0.14),
+    0 6px 22px rgba(0,0,0,0.45);
+}
+
+/* ── Focus Mode option buttons · light blue + dark blue ── */
+.fm-option {
+  position: relative;
+  background:
+    linear-gradient(rgba(8,8,16,0.55), rgba(8,8,16,0.55)) padding-box,
+    linear-gradient(135deg, rgba(124,195,255,0.42) 0%, rgba(65,100,255,0.42) 100%) border-box;
+  border: 1.5px solid transparent;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 4px 16px rgba(0,0,0,0.4);
+}
+.fm-option::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 100% 80% at 10% 15%, rgba(124,195,255,0.11) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 65% at 90% 85%, rgba(65,100,255,0.10) 0%, transparent 55%);
+  pointer-events: none;
+}
+.fm-option--any {
+  background:
+    linear-gradient(rgba(8,8,16,0.55), rgba(8,8,16,0.55)) padding-box,
+    linear-gradient(135deg, rgba(124,195,255,0.42) 0%, rgba(65,100,255,0.42) 100%) border-box;
+}
+.fm-option--on {
+  background:
+    linear-gradient(rgba(8,8,16,0.50), rgba(8,8,16,0.50)) padding-box,
+    linear-gradient(135deg, var(--glass-lblue) 0%, var(--glass-dblue) 100%) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    0 0 16px rgba(65,100,255,0.28),
+    0 0 40px rgba(124,195,255,0.10),
+    0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* ── Explore title cards · all four colors ── */
+.title-card {
+  position: relative;
+  background:
+    linear-gradient(rgba(8,8,16,0.64), rgba(8,8,16,0.64)) padding-box,
+    linear-gradient(135deg, var(--glass-red) 0%, var(--glass-yellow) 33%, var(--glass-lblue) 66%, var(--glass-dblue) 100%) border-box;
+  border: 1px solid transparent;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 6px 24px rgba(0,0,0,0.45);
+}
+.title-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 110% 70% at 0% 0%, rgba(254,98,55,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 65% at 100% 100%, rgba(65,100,255,0.08) 0%, transparent 55%);
+  pointer-events: none;
+}
+.title-card > * { position: relative; z-index: 1; }
+.title-card:hover {
+  background:
+    linear-gradient(rgba(8,8,16,0.56), rgba(8,8,16,0.56)) padding-box,
+    linear-gradient(135deg, var(--glass-red) 0%, var(--glass-yellow) 33%, var(--glass-lblue) 66%, var(--glass-dblue) 100%) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    0 0 22px rgba(254,98,55,0.11),
+    0 0 22px rgba(65,100,255,0.09),
+    0 10px 32px rgba(0,0,0,0.52);
+}
+.title-card--featured {
+  background:
+    linear-gradient(rgba(8,8,16,0.58), rgba(8,8,16,0.58)) padding-box,
+    linear-gradient(135deg, var(--glass-red) 0%, var(--glass-yellow) 33%, var(--glass-lblue) 66%, var(--glass-dblue) 100%) border-box;
+}
+
+/* ── Gallery card text panel · light blue + dark blue ── */
+.fm-gallery-panel {
+  position: relative;
+  background:
+    linear-gradient(rgba(8,8,16,0.48), rgba(8,8,16,0.48)) padding-box,
+    linear-gradient(135deg, rgba(124,195,255,0.38) 0%, rgba(65,100,255,0.38) 100%) border-box;
+  border: 1px solid transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--r-sm);
+  padding: 0.9rem 1.1rem 1rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 6px 24px rgba(0,0,0,0.55);
+}
+.fm-gallery-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 100% 80% at 10% 15%, rgba(124,195,255,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 65% at 90% 85%, rgba(65,100,255,0.09) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* ── Sidebar mini-cards · subtle blue ── */
+.mini-card {
+  background:
+    linear-gradient(rgba(8,8,16,0.62), rgba(8,8,16,0.62)) padding-box,
+    linear-gradient(135deg, rgba(124,195,255,0.32) 0%, rgba(65,100,255,0.32) 100%) border-box;
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 3px 12px rgba(0,0,0,0.35);
+}
+.mini-card:hover {
+  background:
+    linear-gradient(rgba(8,8,16,0.52), rgba(8,8,16,0.52)) padding-box,
+    linear-gradient(135deg, rgba(124,195,255,0.55) 0%, rgba(65,100,255,0.55) 100%) border-box;
+}
+
+/* ── Explore modal · all four colors ── */
+.modal {
+  background:
+    linear-gradient(rgba(8,8,16,0.75), rgba(8,8,16,0.75)) padding-box,
+    linear-gradient(135deg, var(--glass-red) 0%, var(--glass-yellow) 33%, var(--glass-lblue) 66%, var(--glass-dblue) 100%) border-box;
+  border: 1px solid transparent;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 0 0 1px rgba(255,255,255,0.02),
+    0 24px 64px rgba(0,0,0,0.72);
 }

@@ -1,43 +1,113 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { ArrowLeft, Bookmark } from "@phosphor-icons/react";
-import { type FocusPick, PLATFORM_LOGOS } from "../../data/focusData";
+import { ArrowLeft, Bookmark, FilmStrip, Play } from "@phosphor-icons/react";
+import { type FocusPick } from "../../data/focusData";
+
+export type SnapRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
 
 interface Props {
   pick: FocusPick;
   saved: boolean;
   isClosing: boolean;
-  fromRect: DOMRect | null;
+  fromRect: SnapRect | null;
+  fromPanelRect: SnapRect | null;
   onSave: () => void;
   onRefresh: () => void;
   onClose: () => void;
 }
 
 const EASE = "cubic-bezier(0.4,0,0.2,1)";
-const DUR  = 480;
+const DUR  = 520;
 
-export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSave, onRefresh, onClose }: Props) {
-  const heroRef    = useRef<HTMLDivElement>(null);
-  const bodyRef    = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const flyRef     = useRef<HTMLDivElement>(null);
-  const scrimRef   = useRef<HTMLDivElement>(null);
-  const blendRef   = useRef<HTMLDivElement>(null);
-  const savedRect  = useRef<DOMRect | null>(null);
+const PLACEHOLDER_CAST = [
+  "Jordan Smith",
+  "Riley Chen",
+  "Morgan Lee",
+  "Casey Wong",
+  "Alex Rivera",
+];
+
+const PLACEHOLDER_COLLECTIONS = [
+  { name: "Late Night Picks", count: 8 },
+  { name: "Must Watch Again", count: 14 },
+  { name: "Shared with Friends", count: 5 },
+];
+
+function CardText({ pick, tagLimit }: { pick: FocusPick; tagLimit?: number }) {
+  const tags = tagLimit ? pick.mood_tags.slice(0, tagLimit) : pick.mood_tags;
+  return (
+    <>
+      {pick.logoUrl ? (
+        <img src={pick.logoUrl} alt={pick.title} className="fm-gallery-logo" draggable={false} />
+      ) : (
+        <h3 className="fm-gallery-title">{pick.title}</h3>
+      )}
+      <div className="fm-gallery-tags">
+        {tags.map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
+      </div>
+      <p className="fm-gallery-meta">{pick.year} · {pick.runtime} · ★ {pick.imdb_score}</p>
+      <p className="fm-gallery-desc">{pick.description}</p>
+    </>
+  );
+}
+
+function fadeIn(el: HTMLElement | null, delay = 0) {
+  if (!el) return;
+  el.style.transition = `opacity 320ms ${EASE}${delay ? ` ${delay}ms` : ""}`;
+  el.style.opacity    = "1";
+}
+
+export default function MovieDetailPage({
+  pick, saved, isClosing, fromRect, fromPanelRect, onSave, onRefresh, onClose,
+}: Props) {
+  const scrollRef      = useRef<HTMLDivElement>(null);
+  const heroRef        = useRef<HTMLDivElement>(null);
+  const contentTextRef = useRef<HTMLDivElement>(null);
+  const revealRef      = useRef<HTMLDivElement>(null);
+  const posterRef      = useRef<HTMLDivElement>(null);
+  const flyRef         = useRef<HTMLDivElement>(null);
+  const scrimRef       = useRef<HTMLDivElement>(null);
+  const detailFadeRef  = useRef<HTMLDivElement>(null);
+  const heroFadeRef    = useRef<HTMLDivElement>(null);
+  const flyTextRef     = useRef<HTMLDivElement>(null);
+  const savedRect      = useRef<SnapRect | null>(null);
+  const savedPanelRect = useRef<SnapRect | null>(null);
+  const timersRef      = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const panelRect = fromPanelRect ?? fromRect;
+  const useFlip = !!fromRect && !!panelRect;
+  const isPhoto = !!pick.thumbnailUrl;
+  const watchPlatform = pick.watchPlatforms?.[0];
 
   /* ── Entry ── */
   useLayoutEffect(() => {
-    const flyEl     = flyRef.current;
-    const scrimEl   = scrimRef.current;
-    const blendEl   = blendRef.current;
-    const bodyEl    = bodyRef.current;
-    const contentEl = contentRef.current;
-    const heroEl    = heroRef.current;
-    if (!fromRect || !flyEl || !scrimEl || !blendEl || !bodyEl || !contentEl || !heroEl) return;
+    if (!useFlip) return;
 
-    savedRect.current = fromRect;
+    const flyEl         = flyRef.current;
+    const scrimEl       = scrimRef.current;
+    const detailFadeEl  = detailFadeRef.current;
+    const heroFadeEl    = heroFadeRef.current;
+    const scrollEl      = scrollRef.current;
+    const contentTextEl = contentTextRef.current;
+    const heroEl        = heroRef.current;
+    const flyTextEl     = flyTextRef.current;
+    if (!fromRect || !flyEl || !scrimEl || !detailFadeEl || !scrollEl || !contentTextEl || !heroEl || !flyTextEl) return;
+
+    savedRect.current      = fromRect;
+    savedPanelRect.current = fromPanelRect;
+
+    scrollEl.querySelectorAll<HTMLElement>(".mdp-deferred").forEach((el) => {
+      el.style.transition = "none";
+      el.style.opacity    = "0";
+    });
+
     const { width: heroW, height: heroH } = heroEl.getBoundingClientRect();
+    const destRect = contentTextEl.getBoundingClientRect();
 
-    /* Flying card starts at card's exact bounds */
     flyEl.style.transition   = "none";
     flyEl.style.top          = `${fromRect.top}px`;
     flyEl.style.left         = `${fromRect.left}px`;
@@ -46,31 +116,35 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
     flyEl.style.borderRadius = "16px";
     flyEl.style.opacity      = "1";
 
-    /* Scrim starts fully opaque (card darkness) */
     scrimEl.style.transition = "none";
     scrimEl.style.opacity    = "1";
 
-    /* Blend gradient starts invisible — will fade in over the image */
-    blendEl.style.transition = "none";
-    blendEl.style.opacity    = "0";
+    detailFadeEl.style.transition = "none";
+    detailFadeEl.style.opacity    = "0";
+    detailFadeEl.style.transform  = "scaleY(0.82)";
+    detailFadeEl.style.transformOrigin = "bottom";
 
-    /* Hero hidden until fly finishes */
+    if (heroFadeEl) {
+      heroFadeEl.style.transition = "none";
+      heroFadeEl.style.opacity    = "0";
+    }
+
     heroEl.style.transition = "none";
     heroEl.style.opacity    = "0";
 
-    /* Body stays at natural position, just invisible */
-    bodyEl.style.transition = "none";
-    bodyEl.style.opacity    = "0";
-    bodyEl.style.overflow   = "hidden"; /* clip content above body's top edge during animation */
+    scrollEl.style.overflow = "hidden";
 
-    /* Content slides from card's Y into the body area */
-    const contentOffset = fromRect.top - heroH;
-    contentEl.style.transition = "none";
-    contentEl.style.transform  = `translateY(${contentOffset}px)`;
-    contentEl.style.opacity    = "0";
+    flyTextEl.style.transition = "none";
+    flyTextEl.style.top        = `${panelRect.top}px`;
+    flyTextEl.style.left       = `${panelRect.left}px`;
+    flyTextEl.style.width      = `${panelRect.width}px`;
+    flyTextEl.style.opacity    = "1";
+    flyTextEl.style.visibility = "visible";
 
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      /* Fly expands card → hero bounds */
+    const raf = requestAnimationFrame(() => {
+      const textDelay = Math.round(DUR * 0.06);
+      const textDur   = DUR - textDelay;
+
       flyEl.style.transition = [
         `top ${DUR}ms ${EASE}`,
         `left ${DUR}ms ${EASE}`,
@@ -84,52 +158,74 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
       flyEl.style.height       = `${heroH}px`;
       flyEl.style.borderRadius = "0";
 
-      /* Card scrim fades out as image fills hero */
-      scrimEl.style.transition = `opacity ${DUR}ms ${EASE}`;
+      scrimEl.style.transition = `opacity ${Math.round(DUR * 0.72)}ms ${EASE} ${Math.round(DUR * 0.18)}ms`;
       scrimEl.style.opacity    = "0";
 
-      /* Blend gradient fades in over the expanding image from the very start */
-      blendEl.style.transition = `opacity ${DUR}ms ${EASE}`;
-      blendEl.style.opacity    = "1";
+      detailFadeEl.style.transition = `opacity ${DUR}ms ${EASE}, transform ${DUR}ms ${EASE}`;
+      detailFadeEl.style.opacity    = "1";
+      detailFadeEl.style.transform  = "scaleY(1)";
 
-      /* Body background fades in at its natural position below hero */
-      bodyEl.style.transition = `opacity ${DUR}ms ${EASE}`;
-      bodyEl.style.opacity    = "1";
+      flyTextEl.style.transition = [
+        `top ${textDur}ms ${EASE} ${textDelay}ms`,
+        `left ${textDur}ms ${EASE} ${textDelay}ms`,
+        `width ${textDur}ms ${EASE} ${textDelay}ms`,
+      ].join(", ");
+      flyTextEl.style.top   = `${destRect.top}px`;
+      flyTextEl.style.left  = `${destRect.left}px`;
+      flyTextEl.style.width = `${destRect.width}px`;
 
-      /* Content slides down from card's Y into the body, slightly delayed */
-      const cDelay = Math.round(DUR * 0.15);
-      const cDur   = DUR - cDelay;
-      contentEl.style.transition = `transform ${cDur}ms ${EASE} ${cDelay}ms, opacity ${cDur}ms ease ${cDelay}ms`;
-      contentEl.style.transform  = "none";
-      contentEl.style.opacity    = "1";
-
-      /* Crossfade fly → real hero once fly reaches bounds */
-      setTimeout(() => {
-        flyEl.style.transition  = "opacity 180ms ease";
+      timersRef.current.push(setTimeout(() => {
+        if (heroFadeEl) {
+          heroFadeEl.style.transition = "none";
+          heroFadeEl.style.opacity    = "1";
+        }
+        flyEl.style.transition  = "opacity 160ms ease";
         flyEl.style.opacity     = "0";
-        heroEl.style.transition = "opacity 180ms ease";
+        heroEl.style.transition = "opacity 160ms ease";
         heroEl.style.opacity    = "1";
-        bodyEl.style.overflow   = ""; /* restore scrolling */
-      }, DUR + 20);
-    }));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        scrollEl.style.overflow = "";
+
+        flyTextEl.style.visibility = "hidden";
+        contentTextEl.classList.add("mdp-info-text--settled");
+
+        scrollEl.querySelectorAll<HTMLElement>(".mdp-deferred").forEach((el, i) => fadeIn(el, i * 40));
+      }, DUR + 24));
+    });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
+    };
+  }, [useFlip, fromRect, panelRect, fromPanelRect]);
 
   /* ── Exit ── */
   useEffect(() => {
-    const flyEl     = flyRef.current;
-    const scrimEl   = scrimRef.current;
-    const blendEl   = blendRef.current;
-    const bodyEl    = bodyRef.current;
-    const contentEl = contentRef.current;
-    const heroEl    = heroRef.current;
-    if (!isClosing || !savedRect.current || !flyEl || !scrimEl || !blendEl || !bodyEl || !contentEl || !heroEl) return;
+    if (!isClosing || !savedRect.current || !useFlip) return;
 
-    const from          = savedRect.current;
-    const heroRect      = heroEl.getBoundingClientRect();
-    const dur           = DUR - 50;
-    const contentOffset = from.top - heroRect.height;
+    const flyEl         = flyRef.current;
+    const scrimEl       = scrimRef.current;
+    const detailFadeEl  = detailFadeRef.current;
+    const heroFadeEl    = heroFadeRef.current;
+    const scrollEl      = scrollRef.current;
+    const contentTextEl = contentTextRef.current;
+    const heroEl        = heroRef.current;
+    const flyTextEl     = flyTextRef.current;
+    if (!flyEl || !scrimEl || !detailFadeEl || !scrollEl || !contentTextEl || !heroEl || !flyTextEl) return;
 
-    /* Snap fly to hero position; hide real hero; scrim invisible */
+    const from      = savedRect.current;
+    const panelFrom = savedPanelRect.current ?? from;
+    const heroRect  = heroEl.getBoundingClientRect();
+    const dur       = DUR - 40;
+    const destRect  = contentTextEl.getBoundingClientRect();
+
+    contentTextEl.classList.remove("mdp-info-text--settled");
+
+    scrollEl.querySelectorAll<HTMLElement>(".mdp-deferred").forEach((el) => {
+      el.style.transition = `opacity ${Math.round(dur * 0.15)}ms ease`;
+      el.style.opacity    = "0";
+    });
+
     flyEl.style.transition   = "none";
     flyEl.style.top          = "0";
     flyEl.style.left         = "0";
@@ -141,13 +237,29 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
     scrimEl.style.transition = "none";
     scrimEl.style.opacity    = "0";
 
+    detailFadeEl.style.transition = "none";
+    detailFadeEl.style.opacity    = "1";
+    detailFadeEl.style.transform  = "scaleY(1)";
+    detailFadeEl.style.transformOrigin = "bottom";
+
+    if (heroFadeEl) {
+      heroFadeEl.style.transition = "none";
+      heroFadeEl.style.opacity    = "0";
+    }
+
     heroEl.style.transition = "none";
     heroEl.style.opacity    = "0";
 
-    bodyEl.style.overflow = "hidden";
+    scrollEl.style.overflow = "hidden";
 
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      /* Fly shrinks back to card */
+    flyTextEl.style.transition  = "none";
+    flyTextEl.style.visibility  = "visible";
+    flyTextEl.style.top         = `${destRect.top}px`;
+    flyTextEl.style.left        = `${destRect.left}px`;
+    flyTextEl.style.width       = `${destRect.width}px`;
+    flyTextEl.style.opacity     = "1";
+
+    const raf = requestAnimationFrame(() => {
       flyEl.style.transition = [
         `top ${dur}ms ${EASE}`,
         `left ${dur}ms ${EASE}`,
@@ -161,110 +273,141 @@ export default function MovieDetailPage({ pick, saved, isClosing, fromRect, onSa
       flyEl.style.height       = `${from.height}px`;
       flyEl.style.borderRadius = "16px";
 
-      /* Scrim fades back in so fly looks like the gallery card */
-      scrimEl.style.transition = `opacity ${dur}ms ${EASE}`;
+      scrimEl.style.transition = `opacity ${Math.round(dur * 0.55)}ms ${EASE} ${Math.round(dur * 0.2)}ms`;
       scrimEl.style.opacity    = "1";
 
-      /* Blend fades out so image is clean as fly shrinks */
-      blendEl.style.transition = `opacity ${dur}ms ${EASE}`;
-      blendEl.style.opacity    = "0";
+      detailFadeEl.style.transition = `opacity ${Math.round(dur * 0.65)}ms ${EASE}, transform ${Math.round(dur * 0.65)}ms ${EASE}`;
+      detailFadeEl.style.opacity    = "0";
+      detailFadeEl.style.transform  = "scaleY(0.82)";
 
-      /* Body fades out */
-      bodyEl.style.transition = `opacity ${dur}ms ${EASE}`;
-      bodyEl.style.opacity    = "0";
+      flyTextEl.style.transition = [
+        `top ${dur}ms ${EASE}`,
+        `left ${dur}ms ${EASE}`,
+        `width ${dur}ms ${EASE}`,
+      ].join(", ");
+      flyTextEl.style.top   = `${panelFrom.top}px`;
+      flyTextEl.style.left  = `${panelFrom.left}px`;
+      flyTextEl.style.width = `${panelFrom.width}px`;
+    });
 
-      /* Content slides back up toward card Y while fading */
-      contentEl.style.transition = `transform ${dur}ms ${EASE}, opacity ${Math.round(dur * 0.4)}ms ease`;
-      contentEl.style.transform  = `translateY(${contentOffset}px)`;
-      contentEl.style.opacity    = "0";
-    }));
-  }, [isClosing]);
-
-  const useFlip = !!fromRect;
+    return () => cancelAnimationFrame(raf);
+  }, [isClosing, useFlip]);
 
   return (
     <div className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}>
 
-      {/* Blend gradient — fades in over the fly/hero from animation start */}
-      {useFlip && <div className="mdp-blend" ref={blendRef} />}
-
-      {/* Flying card — expands from card bounds to hero, then crossfades out */}
       {useFlip && (
         <div
           className="mdp-fly"
           ref={flyRef}
-          style={pick.thumbnailUrl
+          style={isPhoto
             ? { backgroundImage: `url(${pick.thumbnailUrl})` }
             : { background: pick.posterGradient }
           }
         >
-          <div className="mdp-fly-scrim" ref={scrimRef} />
+          <div className={`mdp-fly-scrim${isPhoto ? " mdp-fly-scrim--photo" : ""}`} ref={scrimRef} />
+          <div className="mdp-fly-hero-fade" ref={detailFadeRef} />
         </div>
       )}
 
-      {/* Hero — fades in after fly animation completes */}
-      <div className="mdp-hero" ref={heroRef}>
-        {pick.thumbnailUrl ? (
-          <div className="mdp-hero-bg" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }} />
-        ) : (
-          <div className="mdp-hero-bg" style={{ background: pick.posterGradient }}>
-            <div className="mdp-hero-glow" style={{ background: pick.posterGlow }} />
+      {useFlip && panelRect && (
+        <div
+          className="mdp-fly-text"
+          ref={flyTextRef}
+          style={{ top: panelRect.top, left: panelRect.left, width: panelRect.width }}
+        >
+          <div className="mdp-fly-text-panel">
+            <CardText pick={pick} tagLimit={3} />
           </div>
-        )}
-        <div className="mdp-hero-fade" />
-        <button type="button" className="mdp-back" onClick={onClose}>
-          <ArrowLeft size={15} weight="bold" />
-          Back
-        </button>
-      </div>
+        </div>
+      )}
 
-      {/* Body — fades in at natural position below hero */}
-      <div className="mdp-body" ref={bodyRef}>
-        <div className="mdp-content" ref={contentRef}>
-          <div className="mdp-content-main">
-            <div className="mdp-content-text">
-              {pick.logoUrl ? (
-                <img src={pick.logoUrl} alt={pick.title} className="mdp-logo" draggable={false} />
-              ) : (
-                <h1 className="mdp-title">{pick.title}</h1>
-              )}
-              <div className="mdp-tags">
-                {pick.mood_tags.map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
-              </div>
-              <p className="mdp-meta">{pick.year} · {pick.runtime} · ★ {pick.imdb_score}</p>
-              <p className="mdp-desc">{pick.description}</p>
-              <p className="mdp-why">"{pick.why_this}"</p>
-              <div className="mdp-actions">
-                {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
-                  <div className="mdp-watch">
-                    {pick.watchPlatforms.map((plat) => (
-                      <button key={plat} type="button" className="fm-watch-btn">
-                        <img src={PLATFORM_LOGOS[plat] ?? ""} alt={plat} className="fm-watch-btn-logo" />
-                        <span>Watch now</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div className="mdp-btns">
-                  <button
-                    type="button"
-                    className={`fm-save-btn${saved ? " fm-save-btn--saved" : ""}`}
-                    onClick={onSave}
-                  >
-                    <Bookmark size={16} weight={saved ? "fill" : "regular"} />
-                    {saved ? "Saved" : "Save for later"}
-                  </button>
-                  <button type="button" className="fm-close-btn" onClick={onRefresh}>
-                    Not for me — try another
-                  </button>
-                </div>
-              </div>
+      <button type="button" className="mdp-back" onClick={onClose}>
+        <ArrowLeft size={15} weight="bold" />
+        Back
+      </button>
+
+      <div className="mdp-scroll" ref={scrollRef}>
+        <div className="mdp-hero" ref={heroRef}>
+          {isPhoto ? (
+            <div className="mdp-hero-bg" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }} />
+          ) : (
+            <div className="mdp-hero-bg" style={{ background: pick.posterGradient }}>
+              <div className="mdp-hero-glow" style={{ background: pick.posterGlow }} />
             </div>
+          )}
+          <div className="mdp-hero-fade" ref={heroFadeRef} />
+        </div>
+
+        <div className="mdp-page">
+          <div className="mdp-main">
             {pick.posterUrl && (
-              <div className="mdp-poster">
+              <div className="mdp-poster mdp-deferred" ref={posterRef}>
                 <img src={pick.posterUrl} alt={`${pick.title} poster`} draggable={false} />
               </div>
             )}
+
+            <div className="mdp-info">
+              <div className="mdp-info-text" ref={contentTextRef}>
+                <CardText pick={pick} />
+              </div>
+
+              <div className="mdp-pills mdp-deferred">
+                <button type="button" className="mdp-pill mdp-pill--primary">
+                  <Play size={14} weight="fill" />
+                  {watchPlatform ? `Watch on ${watchPlatform}` : "Watch movie"}
+                </button>
+                <button type="button" className="mdp-pill">
+                  <FilmStrip size={14} weight="duotone" />
+                  Watch trailer
+                </button>
+                <button
+                  type="button"
+                  className={`mdp-pill${saved ? " mdp-pill--saved" : ""}`}
+                  onClick={onSave}
+                >
+                  <Bookmark size={14} weight={saved ? "fill" : "regular"} />
+                  {saved ? "Saved" : "Watch later"}
+                </button>
+              </div>
+            </div>
+
+            <aside className="mdp-aside mdp-deferred">
+              <div className="mdp-reviews">
+                <p className="mdp-section-label">Reviews</p>
+                <p className="mdp-review-score">★ {pick.imdb_score}</p>
+                <p className="mdp-review-count">Based on 2.4k ratings</p>
+                <blockquote className="mdp-review-quote">"{pick.why_this}"</blockquote>
+              </div>
+
+              <div className="mdp-cast">
+                <p className="mdp-section-label">Cast</p>
+                <ul className="mdp-cast-list">
+                  {PLACEHOLDER_CAST.map((name) => (
+                    <li key={name}>{name}</li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
+          </div>
+
+          <div className="mdp-reveal mdp-deferred" ref={revealRef}>
+            <section className="mdp-collections">
+              <p className="mdp-section-label">Collections</p>
+              <p className="mdp-collections-sub">Playlists this title appears in</p>
+              <div className="mdp-collection-list">
+                {PLACEHOLDER_COLLECTIONS.map((col) => (
+                  <button key={col.name} type="button" className="mdp-collection-card">
+                    <span className="mdp-collection-name">{col.name}</span>
+                    <span className="mdp-collection-count">{col.count} titles</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <button type="button" className="mdp-skip-link" onClick={onRefresh}>
+              Not for me — try another
+            </button>
           </div>
         </div>
       </div>

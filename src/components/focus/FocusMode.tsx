@@ -14,7 +14,12 @@ import {
   AVOID_OPTIONS,
   type FocusPick,
 } from "../../data/focusData";
-import MovieDetailPage from "./MovieDetailPage";
+import MovieDetailPage, { type SnapRect } from "./MovieDetailPage";
+
+function snapRect(r: DOMRect | null): SnapRect | null {
+  if (!r) return null;
+  return { top: r.top, left: r.left, width: r.width, height: r.height };
+}
 
 interface Answers {
   audience: string;
@@ -76,11 +81,12 @@ function QSection({ label, children }: { label: string; children: React.ReactNod
 }
 
 /* ── Gallery Card ── */
-function GalleryCard({ pick, offset, isActive, onClick }: {
-  pick: FocusPick; offset: number; isActive: boolean;
-  onClick: (rect: DOMRect | null) => void;
+function GalleryCard({ pick, offset, isActive, isDetailOpen, onClick }: {
+  pick: FocusPick; offset: number; isActive: boolean; isDetailOpen?: boolean;
+  onClick: (posterRect: SnapRect | null, panelRect: SnapRect | null) => void;
 }) {
   const posterRef = useRef<HTMLDivElement>(null);
+  const panelRef  = useRef<HTMLDivElement>(null);
   const abs     = Math.abs(offset);
   const scale   = Math.max(0.78, 1 - abs * 0.1);
   const blur    = abs * 4;
@@ -89,9 +95,15 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
 
   return (
     <div
-      className={`fm-gallery-slot${isActive ? " fm-gallery-slot--active" : ""}`}
+      className={`fm-gallery-slot${isActive ? " fm-gallery-slot--active" : ""}${isDetailOpen ? " fm-gallery-slot--detail-open" : ""}`}
       style={{ transform: `translateX(calc(-50% + ${offset * step}px)) translateY(-50%)`, zIndex: 10 - abs }}
-      onClick={() => onClick(isActive ? (posterRef.current?.getBoundingClientRect() ?? null) : null)}
+      onClick={() => {
+        if (!isActive) { onClick(null, null); return; }
+        onClick(
+          snapRect(posterRef.current?.getBoundingClientRect() ?? null),
+          snapRect(panelRef.current?.getBoundingClientRect() ?? null),
+        );
+      }}
     >
       <div
         className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}`}
@@ -114,7 +126,7 @@ function GalleryCard({ pick, offset, isActive, onClick }: {
           )}
           <div className={`fm-gallery-scrim${pick.thumbnailUrl ? " fm-gallery-scrim--photo" : ""}`} />
           <div className="fm-gallery-overlay">
-            <div className="fm-gallery-panel">
+            <div className="fm-gallery-panel" ref={panelRef}>
               {pick.logoUrl ? (
                 <img src={pick.logoUrl} alt={pick.title} className="fm-gallery-logo" draggable={false} />
               ) : (
@@ -142,7 +154,8 @@ export default function FocusMode() {
   const [picks, setPicks]         = useState<FocusPick[]>(FOCUS_PICKS);
   const [activeIdx, setActiveIdx] = useState(0);
   const [detailPick, setDetailPick] = useState<FocusPick | null>(null);
-  const [fromRect, setFromRect]   = useState<DOMRect | null>(null);
+  const [fromRect, setFromRect]           = useState<SnapRect | null>(null);
+  const [fromPanelRect, setFromPanelRect] = useState<SnapRect | null>(null);
   const [isClosingDetail, setIsClosingDetail] = useState(false);
   const [saved, setSaved]         = useState<string[]>([]);
 
@@ -235,7 +248,7 @@ export default function FocusMode() {
 
   const closeDetail = useCallback(() => {
     setIsClosingDetail(true);
-    setTimeout(() => { setDetailPick(null); setIsClosingDetail(false); }, 440);
+    setTimeout(() => { setDetailPick(null); setIsClosingDetail(false); }, 500);
   }, []);
 
   const handleDetailRefresh = useCallback((pick: FocusPick) => {
@@ -308,9 +321,15 @@ export default function FocusMode() {
                   pick={pick}
                   offset={i - activeIdx}
                   isActive={i === activeIdx}
-                  onClick={(rect) => {
-                    if (i === activeIdx) { setDetailPick(pick); setFromRect(rect); }
-                    else setActiveIdx(i);
+                  isDetailOpen={!!detailPick && i === activeIdx}
+                  onClick={(posterRect, panelRect) => {
+                    if (i === activeIdx) {
+                      setFromRect(posterRect);
+                      setFromPanelRect(panelRect);
+                      setDetailPick(pick);
+                    } else {
+                      setActiveIdx(i);
+                    }
                   }}
                 />
               ))}
@@ -325,6 +344,7 @@ export default function FocusMode() {
           saved={saved.includes(detailPick.id)}
           isClosing={isClosingDetail}
           fromRect={fromRect}
+          fromPanelRect={fromPanelRect}
           onSave={() => toggleSave(detailPick)}
           onRefresh={() => handleDetailRefresh(detailPick)}
           onClose={closeDetail}
