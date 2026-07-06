@@ -2285,7 +2285,7 @@ input  { font-family: inherit; }
   position: fixed;
   top: 0;
   left: var(--sidebar-icon-w);
-  right: 0;
+  width: calc(100vw - var(--sidebar-icon-w));
   height: 38.04vw; /* 50% of natural aspect ratio */
   object-fit: fill;
   opacity: 0.7;
