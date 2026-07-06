@@ -743,7 +743,7 @@ input  { font-family: inherit; }
   gap: 2rem;
 }
 
-.fm-intro { text-align: center; display: flex; flex-direction: column; gap: 0.35rem; padding-bottom: 0.4rem; }
+.fm-intro { text-align: center; display: flex; flex-direction: column; gap: 0.35rem; padding-top: 2.5rem; padding-bottom: 2rem; }
 .fm-intro-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.60); }
 .fm-intro-title  { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: rgba(255,255,255,1.00); }
 .fm-intro-hint   { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
