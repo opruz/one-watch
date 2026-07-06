@@ -2279,17 +2279,16 @@ input  { font-family: inherit; }
   background: var(--bg);
 }
 
-.fm-page::before {
-  content: "";
+.fm-page-bg {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  height: 0;
-  padding-top: 38.04%; /* 50% of natural ratio: 1205/1584 */
-  background: url("/onewatch-background.png") top center / 100% 100% no-repeat;
+  width: 100%;
+  height: 38.04vw; /* 50% of natural aspect ratio */
+  object-fit: fill;
   pointer-events: none;
   z-index: 0;
+  display: block;
 }
 
 .fm-page::after {

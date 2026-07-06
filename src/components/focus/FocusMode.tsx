@@ -259,6 +259,8 @@ export default function FocusMode() {
   return (
     <div className="fm-page">
 
+      <img src="/onewatch-background.png" className="fm-page-bg" alt="" draggable={false} />
+
       {/* ── Questionnaire — normal doc flow, scrolls with .main ── */}
       <div className="fm-wrap">
         <div className="fm-questionnaire">
