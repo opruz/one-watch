@@ -2581,8 +2581,12 @@ input  { font-family: inherit; }
               box-shadow 0.3s;
 }
 .fm-gallery-card--active {
-  outline-color: rgba(255,255,255,0.20);
-  box-shadow: 0 6px 4px rgba(0,0,0,0.35), 0 20px 70px rgba(0,0,0,0.6);
+  outline: none;
+  border: 1px solid var(--glass-border-strong);
+  box-shadow:
+    var(--glass-highlight),
+    var(--liquid-shadow),
+    0 24px 80px rgba(0,0,0,0.55);
 }
 
 /* Gallery dim (inactive card overlay) */
