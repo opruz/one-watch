@@ -488,6 +488,12 @@ input  { font-family: inherit; }
   -webkit-user-drag: none;
 }
 
+.ob-platform-logo[alt="Disney+"],
+.ob-platform-logo[alt="HBO Max"] {
+  max-width: 90%;
+  max-height: 44px;
+}
+
 .ob-platform-check {
   position: absolute;
   top: 5px;
