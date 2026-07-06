@@ -426,10 +426,11 @@ input  { font-family: inherit; }
   font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.2;
+  color: rgba(255,255,255,1.00);
 }
 .ob-sub {
   font-size: 0.9rem;
-  color: var(--sub);
+  color: rgba(255,255,255,0.50);
   line-height: 1.6;
   max-width: 360px;
 }
@@ -439,7 +440,7 @@ input  { font-family: inherit; }
   font-weight: 600;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(255,255,255,0.40);
 }
 
 /* 4 col × 2 row logo grid */
@@ -567,10 +568,11 @@ input  { font-family: inherit; }
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  color: rgba(255,255,255,1.00);
 }
 .aim-sub {
   font-size: 0.8rem;
-  color: var(--sub);
+  color: rgba(255,255,255,0.48);
   line-height: 1.5;
   max-width: 280px;
 }
@@ -742,9 +744,9 @@ input  { font-family: inherit; }
 }
 
 .fm-intro { text-align: center; display: flex; flex-direction: column; gap: 0.35rem; padding-bottom: 0.4rem; }
-.fm-intro-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
-.fm-intro-title  { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
-.fm-intro-hint   { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.fm-intro-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.60); }
+.fm-intro-title  { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: rgba(255,255,255,1.00); }
+.fm-intro-hint   { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
 
 .fm-section { display: flex; flex-direction: column; gap: 0.7rem; }
 
@@ -753,7 +755,7 @@ input  { font-family: inherit; }
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--sub);
+  color: rgba(255,255,255,0.55);
 }
 
 .fm-option-grid {
@@ -830,9 +832,9 @@ input  { font-family: inherit; }
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--sub);
+  color: rgba(255,255,255,0.90);
 }
-.fm-results-sub { font-size: 0.75rem; color: var(--muted); }
+.fm-results-sub { font-size: 0.75rem; color: rgba(255,255,255,0.42); }
 
 /* ── Gallery ── */
 .fm-gallery {
