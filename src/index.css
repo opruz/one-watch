@@ -2286,7 +2286,7 @@ input  { font-family: inherit; }
   left: 0;
   right: 0;
   height: 360px;
-  background: url("/onewatch-background.png") top center / cover no-repeat;
+  background: url("/onewatch-background.png") top center / contain no-repeat;
   pointer-events: none;
   z-index: 0;
 }
