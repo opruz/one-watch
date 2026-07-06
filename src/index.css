@@ -2294,6 +2294,22 @@ input  { font-family: inherit; }
   display: block;
 }
 
+.fm-page::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-icon-w);
+  width: calc(100vw - var(--sidebar-icon-w));
+  height: 38.04vw;
+  background: linear-gradient(to bottom,
+    rgba(9,9,11,0)    0%,
+    rgba(9,9,11,0.35) 55%,
+    rgba(9,9,11,0.70) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .fm-page::after {
   content: none;
 }
