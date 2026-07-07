@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Crosshair, Television, X,
+  Crosshair, Television, FilmStrip,
   Star, User, Heart, Users, UsersThree,
-  Coffee, Lightning, Drop, Sparkle, Smiley,
+  Coffee, Lightning, Drop, Sparkle, Smiley, Flame,
   Clock, Moon,
 } from "@phosphor-icons/react";
 import { getRecommendations, getOneRecommendation } from "../../lib/claude";
 import {
   FOCUS_PICKS,
   AUDIENCE_OPTIONS,
-  MOOD_OPTIONS,
-  TIME_OPTIONS,
-  AVOID_OPTIONS,
+  GENRE_OPTIONS,
+  FORMAT_TYPE_OPTIONS,
+  MOVIE_LENGTH_OPTIONS,
+  SHOW_TYPE_OPTIONS,
   type FocusPick,
 } from "../../data/focusData";
 import MovieDetailPage, { type SnapRect } from "./MovieDetailPage";
@@ -23,12 +24,12 @@ function snapRect(r: DOMRect | null): SnapRect | null {
 
 interface Answers {
   audience: string;
-  mood: string;
-  time: string;
-  avoid: string[];
+  genre: string;
+  formatType: string;
+  formatDetail: string;
 }
 
-const DEFAULT: Answers = { audience: "any", mood: "any", time: "any", avoid: [] };
+const DEFAULT: Answers = { audience: "any", genre: "any", formatType: "any", formatDetail: "any" };
 
 type PhWeight = "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
 type PhIconComp = React.ComponentType<{ size?: number; weight?: PhWeight; color?: string }>;
@@ -36,7 +37,7 @@ type PhIconComp = React.ComponentType<{ size?: number; weight?: PhWeight; color?
 const ICON_MAP: Record<string, PhIconComp> = {
   Star, User, Heart, Users, UsersThree,
   Coffee, Lightning, Drop, Television, Sparkle, Smiley,
-  Clock, Moon,
+  Clock, Moon, Flame, FilmStrip,
 };
 
 function QIcon({ name, size = 16, weight = "duotone" }: { name: string; size?: number; weight?: PhWeight }) {
@@ -45,13 +46,14 @@ function QIcon({ name, size = 16, weight = "duotone" }: { name: string; size?: n
   return <Ic size={size} weight={weight} />;
 }
 
-function OptionGrid({ options, selected, onSelect }: {
+function OptionGrid({ options, selected, onSelect, cols = 4 }: {
   options: { value: string; label: string; icon?: string }[];
   selected: string;
   onSelect: (v: string) => void;
+  cols?: number;
 }) {
   return (
-    <div className="fm-option-grid">
+    <div className="fm-option-grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
       {options.map((opt) => (
         <button
           key={opt.value}
@@ -78,6 +80,46 @@ function QSection({ label, children }: { label: string; children: React.ReactNod
       {children}
     </div>
   );
+}
+
+function buildSummary(answers: Answers): string {
+  const { audience, genre, formatType, formatDetail } = answers;
+  if (audience === "any" && genre === "any" && formatType === "any") {
+    return "We'll find matches across your platforms";
+  }
+
+  let formatStr = "";
+  if (formatType === "Movie") {
+    if (formatDetail === "Short film") formatStr = "short movie";
+    else if (formatDetail === "Long feature") formatStr = "long movie";
+    else formatStr = "movie";
+  } else if (formatType === "TV Show") {
+    if (formatDetail === "Mini-series") formatStr = "mini-series";
+    else if (formatDetail === "Ongoing series") formatStr = "ongoing series";
+    else formatStr = "TV show";
+  }
+
+  const genreStr = genre !== "any" ? genre.toLowerCase() : "";
+  const qualifier = audience === "Family" ? "family-friendly " : "";
+  const ending =
+    audience === "Solo" ? " just for you" :
+    audience === "Date night" ? " perfect for two" :
+    audience === "Friends" ? " great for a group" : "";
+
+  let noun: string;
+  if (formatStr) {
+    const combined = genreStr ? `${genreStr} ${formatStr}` : formatStr;
+    if (qualifier) {
+      noun = combined;
+    } else {
+      const first = combined[0].toLowerCase();
+      noun = ("aeiou".includes(first) ? "an " : "a ") + combined;
+    }
+  } else {
+    noun = genreStr ? `${genreStr} matches` : "matches";
+  }
+
+  return `We'll find ${qualifier}${noun}${ending}`;
 }
 
 /* ── Gallery Card ── */
@@ -172,20 +214,19 @@ export default function FocusMode() {
   useEffect(() => {
     const el = overlayRef.current;
     if (!el) return;
-    const THRESHOLD = 90;   /* px to accumulate before advancing */
-    const COOLDOWN  = 480;  /* ms lockout after each advance */
+    const THRESHOLD = 90;
+    const COOLDOWN  = 480;
 
     const onWheel = (e: WheelEvent) => {
       if (detailOpenRef.current) return;
       const ax = Math.abs(e.deltaX);
       const ay = Math.abs(e.deltaY);
-      if (ax < 6 || ay > ax) return;          /* must be predominantly horizontal */
+      if (ax < 6 || ay > ax) return;
       e.preventDefault();
       const now = Date.now();
-      if (now < wCooldown.current) return;     /* still in cooldown */
+      if (now < wCooldown.current) return;
       const px = e.deltaMode === 1 ? e.deltaX * 16 : e.deltaMode === 2 ? e.deltaX * 100 : e.deltaX;
       wAccum.current += px;
-      /* reset accumulator if no wheel events for 180 ms (prevents slow drift) */
       if (wReset.current) clearTimeout(wReset.current);
       wReset.current = setTimeout(() => { wAccum.current = 0; }, 180);
       if (Math.abs(wAccum.current) >= THRESHOLD) {
@@ -200,15 +241,11 @@ export default function FocusMode() {
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  const set = (field: keyof Answers, value: string | string[]) =>
+  const set = (field: keyof Answers, value: string) =>
     setAnswers((prev) => ({ ...prev, [field]: value }));
 
-  const toggleAvoid = (value: string) => {
-    const next = answers.avoid.includes(value)
-      ? answers.avoid.filter((v) => v !== value)
-      : [...answers.avoid, value];
-    set("avoid", next);
-  };
+  const setFormatType = (v: string) =>
+    setAnswers((prev) => ({ ...prev, formatType: v, formatDetail: "any" }));
 
   const getPlatforms = (): string[] => {
     try { return JSON.parse(localStorage.getItem("ow-platforms") ?? "[]") as string[]; }
@@ -217,7 +254,7 @@ export default function FocusMode() {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    setView("r");          /* slide overlay up immediately — shows skeleton during load */
+    setView("r");
     setDetailPick(null);
     try {
       const platforms = getPlatforms();
@@ -261,47 +298,48 @@ export default function FocusMode() {
 
       <img src="/onewatch-background.png" className="fm-page-bg" alt="" draggable={false} />
 
-      {/* ── Questionnaire — normal doc flow, scrolls with .main ── */}
+      {/* ── Questionnaire ── */}
       <div className="fm-wrap">
         <div className="fm-questionnaire">
           <div className="fm-intro">
             <p className="fm-intro-eyebrow"><Crosshair size={14} weight="duotone" /> Focus Mode</p>
             <h2 className="fm-intro-title">What are you in the mood for?</h2>
-            <p className="fm-intro-hint">Everything defaults to Any — just hit the button.</p>
+            <p className="fm-intro-hint">Choose what fits for you and we'll handle the rest.</p>
           </div>
 
           <QSection label="Who's watching?">
-            <OptionGrid options={AUDIENCE_OPTIONS} selected={answers.audience} onSelect={(v) => set("audience", v)} />
-          </QSection>
-          <QSection label="What's your mood?">
-            <OptionGrid options={MOOD_OPTIONS} selected={answers.mood} onSelect={(v) => set("mood", v)} />
-          </QSection>
-          <QSection label="How much time?">
-            <OptionGrid options={TIME_OPTIONS} selected={answers.time} onSelect={(v) => set("time", v)} />
-          </QSection>
-          <QSection label="Anything to avoid?">
-            <div className="fm-avoid-chips">
-              {AVOID_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`fm-avoid-chip${answers.avoid.includes(opt.value) ? " fm-avoid-chip--on" : ""}`}
-                  onClick={() => toggleAvoid(opt.value)}
-                >
-                  {answers.avoid.includes(opt.value) && <X size={11} weight="bold" />}
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+            <OptionGrid options={AUDIENCE_OPTIONS} selected={answers.audience} onSelect={(v) => set("audience", v)} cols={5} />
           </QSection>
 
-          <button type="button" className="fm-cta" onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? <span className="fm-spinner" /> : "Find something to watch"}
-          </button>
+          <QSection label="What's your genre?">
+            <OptionGrid options={GENRE_OPTIONS} selected={answers.genre} onSelect={(v) => set("genre", v)} cols={5} />
+          </QSection>
+
+          <QSection label="What are you looking for?">
+            <OptionGrid options={FORMAT_TYPE_OPTIONS} selected={answers.formatType} onSelect={setFormatType} cols={3} />
+            {answers.formatType === "Movie" && (
+              <div className="fm-sub-options">
+                <OptionGrid options={MOVIE_LENGTH_OPTIONS} selected={answers.formatDetail} onSelect={(v) => set("formatDetail", v)} cols={4} />
+              </div>
+            )}
+            {answers.formatType === "TV Show" && (
+              <div className="fm-sub-options">
+                <OptionGrid options={SHOW_TYPE_OPTIONS} selected={answers.formatDetail} onSelect={(v) => set("formatDetail", v)} cols={3} />
+              </div>
+            )}
+          </QSection>
         </div>
       </div>
 
-      {/* ── Results overlay — position:fixed, slides up over questionnaire ── */}
+      {/* ── Sticky footer: summary + CTA ── */}
+      <div className={`fm-sticky-footer${view === "r" ? " fm-sticky-footer--hidden" : ""}`}>
+        <p className="fm-summary-text">{buildSummary(answers)}</p>
+        <button type="button" className="fm-cta" onClick={handleSubmit} disabled={isLoading}>
+          {isLoading ? <span className="fm-spinner" /> : "Find my picks"}
+        </button>
+      </div>
+
+      {/* ── Results overlay ── */}
       <div className={`fm-results-overlay${view === "r" ? " fm-results-overlay--in" : ""}`} ref={overlayRef}>
         {isLoading ? (
           <div className="fm-gallery-skeleton" />

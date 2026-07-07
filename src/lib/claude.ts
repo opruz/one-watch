@@ -2,9 +2,9 @@ import type { FocusPick } from "../data/focusData";
 
 export interface ClaudeAnswers {
   audience: string;
-  mood: string;
-  time: string;
-  avoid: string[];
+  genre: string;
+  formatType: string;
+  formatDetail: string;
 }
 
 interface ClaudePick {
@@ -108,14 +108,19 @@ function buildPrompt(platforms: string[], answers: ClaudeAnswers, count: number,
     ? `\nAlready shown (do not repeat): ${avoidTitles.join(", ")}`
     : "";
 
+  const formatLine = answers.formatType === "any"
+    ? "no preference"
+    : answers.formatDetail !== "any"
+      ? `${answers.formatType} — ${answers.formatDetail}`
+      : answers.formatType;
+
   return `You are the recommendation engine for "One Watch" — an app that eliminates streaming decision fatigue.
 
 User profile:
 - Streaming subscriptions: ${platforms.join(", ")}
 - Watching with: ${answers.audience === "any" ? "anyone / no preference" : answers.audience}
-- Mood: ${answers.mood === "any" ? "no preference" : answers.mood}
-- Time available: ${answers.time === "any" ? "no preference" : answers.time}
-- Wants to avoid: ${answers.avoid.length ? answers.avoid.join(", ") : "nothing"}${avoidLine}
+- Genre: ${answers.genre === "any" ? "no preference" : answers.genre}
+- Format: ${formatLine}${avoidLine}
 
 Return EXACTLY ${count} recommendation${count > 1 ? "s" : ""} as a JSON array. Each item MUST:
 1. Be currently available on one of the user's platforms

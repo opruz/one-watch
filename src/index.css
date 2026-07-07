@@ -736,7 +736,7 @@ input  { font-family: inherit; }
 .fm-change-answers-btn:hover { color: var(--text); }
 
 .fm-wrap {
-  padding: 1.4rem 1.4rem 3rem;
+  padding: 1.4rem 1.4rem 9rem;
   max-width: 900px;
   margin: 0 auto;
   width: 100%;
@@ -790,20 +790,41 @@ input  { font-family: inherit; }
 .fm-opt-icon  { font-size: 1.05rem; flex-shrink: 0; }
 .fm-opt-label { font-size: 0.78rem; font-weight: 500; line-height: 1.3; }
 
-.fm-avoid-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.fm-sub-options {
+  margin-top: 0.5rem;
+  animation: fm-sub-reveal 0.22s ease both;
+}
+@keyframes fm-sub-reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-.fm-avoid-chip {
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  font-size: 0.77rem;
-  font-weight: 500;
-  color: var(--sub);
-  min-height: 38px;
+.fm-sticky-footer {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-icon-w);
+  right: 0;
+  z-index: 80;
+  padding: 0.8rem 1.4rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-width: calc(900px + var(--sidebar-icon-w));
+  transition: opacity 0.28s ease, transform 0.28s ease;
 }
-.fm-avoid-chip--on {
-  color: var(--accent);
+.fm-sticky-footer--hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
 }
-.fm-avoid-chip:active { opacity: 0.75; }
+
+.fm-summary-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  font-style: italic;
+  line-height: 1.4;
+}
 
 .fm-cta {
   display: flex;
@@ -2534,24 +2555,9 @@ input  { font-family: inherit; }
   box-shadow: var(--glass-highlight), 0 0 22px rgba(124,195,255,0.22);
 }
 
-/* Avoid chips */
-.fm-avoid-chip {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-highlight);
-  transition: transform 0.28s var(--ease), background 0.28s var(--ease), border-color 0.28s var(--ease), color 0.24s var(--ease), box-shadow 0.28s var(--ease);
-}
-.fm-avoid-chip:hover {
-  background: var(--glass-strong);
-  border-color: var(--glass-border-strong);
-  color: var(--sub);
-  transform: translateY(-1px);
-}
-.fm-avoid-chip--on {
-  background: var(--glass-active);
-  border-color: rgba(124,195,255,0.42);
-  color: var(--accent);
-  box-shadow: var(--glass-highlight), 0 0 18px rgba(124,195,255,0.18);
+/* Sticky footer */
+.fm-sticky-footer {
+  background: linear-gradient(to top, rgba(9,9,11,0.96) 55%, rgba(9,9,11,0.7) 80%, transparent);
 }
 
 /* Tags */

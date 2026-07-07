@@ -217,28 +217,33 @@ export const AUDIENCE_OPTIONS = [
   { value: "Family", label: "Family", icon: "UsersThree" },
 ];
 
-export const MOOD_OPTIONS = [
+export const GENRE_OPTIONS = [
   { value: "any", label: "Any", icon: "Star" },
-  { value: "Cozy", label: "Cozy", icon: "Coffee" },
-  { value: "Tense & gripping", label: "Tense & gripping", icon: "Lightning" },
-  { value: "Want to cry", label: "Want to cry", icon: "Drop" },
-  { value: "Turn brain off", label: "Turn brain off", icon: "Television" },
-  { value: "Feel inspired", label: "Feel inspired", icon: "Sparkle" },
-  { value: "Something funny", label: "Something funny", icon: "Smiley" },
+  { value: "Comedy", label: "Comedy", icon: "Smiley" },
+  { value: "Thriller", label: "Thriller", icon: "Lightning" },
+  { value: "Drama", label: "Drama", icon: "Drop" },
+  { value: "Romance", label: "Romance", icon: "Heart" },
+  { value: "Horror", label: "Horror", icon: "Moon" },
+  { value: "Action", label: "Action", icon: "Flame" },
+  { value: "Sci-fi", label: "Sci-fi", icon: "Sparkle" },
+  { value: "Documentary", label: "Documentary", icon: "Television" },
 ];
 
-export const TIME_OPTIONS = [
+export const FORMAT_TYPE_OPTIONS = [
   { value: "any", label: "Any", icon: "Star" },
-  { value: "Under 45 min", label: "Under 45 min", icon: "Lightning" },
-  { value: "~90 min", label: "~90 min", icon: "Clock" },
-  { value: "~2 hours", label: "~2 hours", icon: "Clock" },
-  { value: "All night", label: "All night", icon: "Moon" },
+  { value: "Movie", label: "Movie", icon: "FilmStrip" },
+  { value: "TV Show", label: "TV Show", icon: "Television" },
 ];
 
-export const AVOID_OPTIONS = [
-  { value: "horror", label: "No horror" },
-  { value: "subtitles", label: "No subtitles" },
-  { value: "documentaries", label: "No docs" },
-  { value: "long episodes", label: "No long eps" },
-  { value: "sequels", label: "No sequels" },
+export const MOVIE_LENGTH_OPTIONS = [
+  { value: "any", label: "Any", icon: "Star" },
+  { value: "Short film", label: "Short film (under 1hr)", icon: "Lightning" },
+  { value: "Feature", label: "Feature (1.5–2 hrs)", icon: "Clock" },
+  { value: "Long feature", label: "Long feature (2hrs+)", icon: "Moon" },
+];
+
+export const SHOW_TYPE_OPTIONS = [
+  { value: "any", label: "Any", icon: "Star" },
+  { value: "Mini-series", label: "Mini-series", icon: "Clock" },
+  { value: "Ongoing series", label: "Ongoing series", icon: "Television" },
 ];
