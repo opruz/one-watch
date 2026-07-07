@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { ArrowLeft, Bookmark, FilmStrip, Play } from "@phosphor-icons/react";
-import { type FocusPick } from "../../data/focusData";
+import { ArrowLeft, Bookmark, FilmStrip, Star } from "@phosphor-icons/react";
+import { type FocusPick, PLATFORM_LOGOS } from "../../data/focusData";
 
 export type SnapRect = {
   top: number;
@@ -81,7 +81,7 @@ export default function MovieDetailPage({
   const panelRect = fromPanelRect ?? fromRect;
   const useFlip = !!fromRect && !!panelRect;
   const isPhoto = !!pick.thumbnailUrl;
-  const watchPlatform = pick.watchPlatforms?.[0];
+  const cast = pick.cast ?? PLACEHOLDER_CAST;
 
   /* ── Entry ── */
   useLayoutEffect(() => {
@@ -353,37 +353,63 @@ export default function MovieDetailPage({
               </div>
 
               <div className="mdp-pills mdp-deferred">
-                <button type="button" className="mdp-pill mdp-pill--primary">
-                  <Play size={14} weight="fill" />
-                  {watchPlatform ? `Watch on ${watchPlatform}` : "Watch movie"}
-                </button>
-                <button type="button" className="mdp-pill">
-                  <FilmStrip size={14} weight="duotone" />
-                  Watch trailer
-                </button>
-                <button
-                  type="button"
-                  className={`mdp-pill${saved ? " mdp-pill--saved" : ""}`}
-                  onClick={onSave}
-                >
-                  <Bookmark size={14} weight={saved ? "fill" : "regular"} />
-                  {saved ? "Saved" : "Watch later"}
-                </button>
+                {/* Trailer + save row */}
+                <div className="mdp-pills-row">
+                  <button type="button" className="mdp-pill">
+                    <FilmStrip size={14} weight="duotone" />
+                    Watch trailer
+                  </button>
+                  <button
+                    type="button"
+                    className={`mdp-pill${saved ? " mdp-pill--saved" : ""}`}
+                    onClick={onSave}
+                  >
+                    <Bookmark size={14} weight={saved ? "fill" : "regular"} />
+                    {saved ? "Saved" : "Save for later"}
+                  </button>
+                </div>
+
+                {/* Streaming platform buttons */}
+                {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
+                  <div className="mdp-platform-row">
+                    {pick.watchPlatforms.map((platform) => (
+                      <button key={platform} type="button" className="mdp-platform-btn">
+                        {PLATFORM_LOGOS[platform] && (
+                          <img
+                            src={PLATFORM_LOGOS[platform]}
+                            alt={platform}
+                            className="mdp-platform-logo-img"
+                            draggable={false}
+                          />
+                        )}
+                        <span>{platform}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             <aside className="mdp-aside mdp-deferred">
               <div className="mdp-reviews">
                 <p className="mdp-section-label">Reviews</p>
-                <p className="mdp-review-score">★ {pick.imdb_score}</p>
-                <p className="mdp-review-count">Based on 2.4k ratings</p>
+                <div className="mdp-rating-row">
+                  <p className="mdp-review-score">
+                    <strong className="mdp-score-value">{pick.imdb_score}</strong>
+                    <span className="mdp-score-denom">/10</span>
+                  </p>
+                  <button type="button" className="mdp-user-rating-btn" title="Rate this">
+                    <Star size={20} weight="regular" />
+                  </button>
+                </div>
+                <p className="mdp-review-count">Based on {pick.ratingCount ?? "2.4k"} ratings</p>
                 <blockquote className="mdp-review-quote">"{pick.why_this}"</blockquote>
               </div>
 
               <div className="mdp-cast">
                 <p className="mdp-section-label">Cast</p>
                 <ul className="mdp-cast-list">
-                  {PLACEHOLDER_CAST.map((name) => (
+                  {cast.map((name) => (
                     <li key={name}>{name}</li>
                   ))}
                 </ul>

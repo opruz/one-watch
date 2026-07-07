@@ -8,6 +8,8 @@ export interface FocusPick {
   mood_tags: string[];
   runtime: string;
   imdb_score: number;
+  ratingCount?: string;
+  cast?: string[];
   description: string;
   why_this: string;
   posterGradient: string;
@@ -27,9 +29,11 @@ export const FOCUS_PICKS: FocusPick[] = [
     type: "movie",
     platform: "Netflix",
     platformColor: "#E50914",
-    mood_tags: ["Tense & gripping", "Something funny"],
+    mood_tags: ["Thriller", "Comedy"],
     runtime: "2h 10m",
     imdb_score: 7.9,
+    ratingCount: "882k",
+    cast: ["Daniel Craig", "Chris Evans", "Ana de Armas", "Jamie Lee Curtis", "Michael Shannon"],
     description:
       "When renowned crime novelist Harlan Thrombey is found dead at his estate just after his 85th birthday, the inquisitive and debonair Detective Benoit Blanc is mysteriously enlisted to investigate.",
     why_this:
@@ -41,7 +45,7 @@ export const FOCUS_PICKS: FocusPick[] = [
     thumbnailUrl: "/knives-out-thumbnail.jpg",
     logoUrl: "/knives-out-logo.png.webp",
     posterUrl: "/knives-out-poster.jpg",
-    watchPlatforms: ["Prime Video", "Apple TV+"],
+    watchPlatforms: ["Apple TV+", "Peacock", "Prime Video"],
   },
   {
     id: "f1",
