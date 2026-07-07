@@ -5,7 +5,7 @@ import {
   Coffee, Lightning, Drop, Sparkle, Smiley, Flame,
   Clock, Moon,
 } from "@phosphor-icons/react";
-import { getRecommendations, getOneRecommendation } from "../../lib/claude";
+import { getRecommendations } from "../../lib/claude";
 import {
   FOCUS_PICKS,
   AUDIENCE_OPTIONS,
@@ -267,19 +267,6 @@ export default function FocusMode() {
     setIsLoading(false);
   };
 
-  const handleRefreshCard = async (pick: FocusPick) => {
-    try {
-      const platforms = getPlatforms();
-      const avoidTitles = picks.map((p) => p.title);
-      const newPick = await getOneRecommendation(
-        platforms.length ? platforms : ["Netflix", "Prime", "Hulu"],
-        answers,
-        avoidTitles,
-      );
-      setPicks((prev) => prev.map((p) => (p.id === pick.id ? newPick : p)));
-    } catch { /* silently keep existing */ }
-  };
-
   const toggleSave = (pick: FocusPick) =>
     setSaved((prev) => prev.includes(pick.id) ? prev.filter((id) => id !== pick.id) : [...prev, pick.id]);
 
@@ -288,10 +275,12 @@ export default function FocusMode() {
     setTimeout(() => { setDetailPick(null); setIsClosingDetail(false); }, 500);
   }, []);
 
-  const handleDetailRefresh = useCallback((pick: FocusPick) => {
+  const handleDetailSkip = useCallback(() => {
     closeDetail();
-    setTimeout(() => { void handleRefreshCard(pick); }, 460);
-  }, [closeDetail]); // eslint-disable-line react-hooks/exhaustive-deps
+    setTimeout(() => {
+      setActiveIdx(i => Math.min(picksLenRef.current - 1, i + 1));
+    }, 520);
+  }, [closeDetail]);
 
   return (
     <div className="fm-page">
@@ -387,7 +376,7 @@ export default function FocusMode() {
           fromRect={fromRect}
           fromPanelRect={fromPanelRect}
           onSave={() => toggleSave(detailPick)}
-          onRefresh={() => handleDetailRefresh(detailPick)}
+          onRefresh={handleDetailSkip}
           onClose={closeDetail}
         />
       )}
