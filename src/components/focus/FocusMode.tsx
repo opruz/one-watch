@@ -302,7 +302,6 @@ export default function FocusMode() {
       <div className="fm-wrap">
         <div className="fm-questionnaire">
           <div className="fm-intro">
-            <p className="fm-intro-eyebrow"><Crosshair size={14} weight="duotone" /> Focus Mode</p>
             <h2 className="fm-intro-title">What are you in the mood for?</h2>
             <p className="fm-intro-hint">Choose what fits for you and we'll handle the rest.</p>
           </div>
