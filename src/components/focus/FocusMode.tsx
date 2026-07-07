@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Crosshair, Television, FilmStrip,
+  Television, FilmStrip,
   Star, User, Heart, Users, UsersThree,
   Coffee, Lightning, Drop, Sparkle, Smiley, Flame,
   Clock, Moon,
