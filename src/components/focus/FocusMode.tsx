@@ -333,10 +333,12 @@ export default function FocusMode() {
 
       {/* ── Sticky footer: summary + CTA ── */}
       <div className={`fm-sticky-footer${view === "r" ? " fm-sticky-footer--hidden" : ""}`}>
-        <p className="fm-summary-text">{buildSummary(answers)}</p>
-        <button type="button" className="fm-cta" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? <span className="fm-spinner" /> : "Find my picks"}
-        </button>
+        <div className="fm-sticky-footer-inner">
+          <p className="fm-summary-text">{buildSummary(answers)}</p>
+          <button type="button" className="fm-cta" onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? <span className="fm-spinner" /> : "Find my picks"}
+          </button>
+        </div>
       </div>
 
       {/* ── Results overlay ── */}
