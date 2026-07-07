@@ -9,6 +9,7 @@
   --bg-high:   rgba(255,255,255,0.12);
   --accent:    #7CC3FF;
   --accent-hov:#a0d4ff;
+  --orange:    #FF8040;
   --text:      #f0f0f8;
   --sub:       #9090b0;
   --muted:     #55557a;
@@ -142,7 +143,7 @@ input  { font-family: inherit; }
   border-radius: var(--r-sm);
   border: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--accent);
   font-size: 0.82rem;
   font-weight: 500;
   text-align: left;
@@ -150,8 +151,8 @@ input  { font-family: inherit; }
   white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
-.side-link:hover { color: var(--sub); }
-.side-link--active { color: var(--accent); }
+.side-link:hover { color: var(--accent-hov); }
+.side-link--active { color: var(--orange); }
 
 .side-link__icon { font-size: 1rem; width: 18px; text-align: center; flex-shrink: 0; }
 
@@ -290,16 +291,16 @@ input  { font-family: inherit; }
   border-radius: 999px;
   border: none;
   background: transparent;
-  color: var(--muted);
+  color: rgba(255,255,255,0.80);
   font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
   transition: background 0.18s, color 0.18s;
 }
 .mode-btn--active {
-  color: var(--text);
+  color: var(--orange);
 }
-.mode-btn:not(.mode-btn--active):hover { color: var(--sub); }
+.mode-btn:not(.mode-btn--active):hover { color: rgba(255,255,255,0.95); }
 
 .topbar__search-wrap {
   flex: 1;
@@ -2369,11 +2370,11 @@ input  { font-family: inherit; }
 }
 .side-link:hover {
   background: var(--bg-card);
-  color: var(--sub);
+  color: var(--accent-hov);
 }
 .side-link--active {
-  background: rgba(124,195,255,0.08);
-  color: var(--accent);
+  background: rgba(255,128,64,0.10);
+  color: var(--orange);
 }
 
 /* watchlist mini-cards */
@@ -2408,12 +2409,12 @@ input  { font-family: inherit; }
   transition: transform 0.32s var(--ease), background 0.32s var(--ease), color 0.24s var(--ease), box-shadow 0.32s var(--ease);
 }
 .mode-btn--active {
-  background: var(--glass-active);
-  color: var(--text);
-  box-shadow: var(--glass-highlight), 0 8px 24px rgba(124,195,255,0.12);
+  background: rgba(255,128,64,0.15);
+  color: var(--orange);
+  box-shadow: var(--glass-highlight), 0 8px 24px rgba(255,128,64,0.14);
 }
 .mode-btn:not(.mode-btn--active):hover {
-  color: var(--sub);
+  color: rgba(255,255,255,0.95);
   background: rgba(255,255,255,0.07);
 }
 
