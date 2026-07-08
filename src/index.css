@@ -1,6 +1,13 @@
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ===== TEMP JIGS ===== */
+:root {
+  --jig-hero-h:        clamp(260px, 46vh, 540px); /* detail page image height */
+  --jig-fade-h:        70%;   /* how tall the black gradient is (% of hero) */
+  --jig-fade-start:    40%;   /* where fade begins (0% = top, 100% = fully at bottom) */
+}
+
 /* ===== ONE WATCH DESIGN TOKENS ===== */
 :root {
   --bg:        #09090b;
@@ -2008,11 +2015,11 @@ input  { font-family: inherit; }
   bottom: 0;
   left: 0;
   right: 0;
-  height: 70%;
+  height: var(--jig-fade-h);
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(8, 8, 16, 0.20) 40%,
+    rgba(8, 8, 16, 0.20) var(--jig-fade-start),
     rgba(8, 8, 16, 0.65) 72%,
     var(--bg) 92%,
     var(--bg) 100%
@@ -2048,7 +2055,7 @@ input  { font-family: inherit; }
 /* Hero — scrolls with page content */
 .mdp-hero {
   position: relative;
-  height: clamp(260px, 46vh, 540px);
+  height: var(--jig-hero-h);
   flex-shrink: 0;
   overflow: visible;
   will-change: opacity;
