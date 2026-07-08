@@ -2048,7 +2048,7 @@ input  { font-family: inherit; }
 /* Hero — scrolls with page content */
 .mdp-hero {
   position: relative;
-  height: clamp(300px, 54vh, 640px);
+  height: clamp(360px, 68vh, 760px);
   flex-shrink: 0;
   overflow: visible;
   will-change: opacity;
@@ -2082,7 +2082,7 @@ input  { font-family: inherit; }
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center;
+  background-position: center top;
 }
 
 .mdp-hero-glow {
@@ -2463,7 +2463,7 @@ input  { font-family: inherit; }
   top: 0;
   left: 0;
   width: 100%;
-  height: 58vw;
+  height: 38.04vw;
   object-fit: fill;
   opacity: 0.7;
   pointer-events: none;
@@ -2477,7 +2477,7 @@ input  { font-family: inherit; }
   top: 0;
   left: 0;
   right: 0;
-  height: 58vw;
+  height: 38.04vw;
   background: linear-gradient(to bottom,
     rgba(9,9,11,0)    0%,
     rgba(9,9,11,0.35) 55%,
