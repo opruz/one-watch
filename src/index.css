@@ -2248,6 +2248,7 @@ input  { font-family: inherit; }
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.38);
+  margin-bottom: 0.55rem;
 }
 
 .mdp-user-rating-btn {

@@ -391,9 +391,9 @@ export default function MovieDetailPage({
 
             <aside className="mdp-aside mdp-deferred">
               <div className="mdp-reviews">
-                <p className="mdp-section-label">Reviews</p>
                 <div className="mdp-rating-row">
                   <div className="mdp-score-block">
+                    <p className="mdp-section-label">Reviews</p>
                     <p className="mdp-review-score">
                       <strong className="mdp-score-value">{pick.imdb_score}</strong>
                       <span className="mdp-score-denom">/10</span>
