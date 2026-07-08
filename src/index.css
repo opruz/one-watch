@@ -2008,13 +2008,13 @@ input  { font-family: inherit; }
   bottom: 0;
   left: 0;
   right: 0;
-  height: 90%;
+  height: 70%;
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(8, 8, 16, 0.25) 28%,
-    rgba(8, 8, 16, 0.7) 58%,
-    var(--bg) 86%,
+    rgba(8, 8, 16, 0.20) 40%,
+    rgba(8, 8, 16, 0.65) 72%,
+    var(--bg) 92%,
     var(--bg) 100%
   );
   pointer-events: none;
@@ -2048,7 +2048,7 @@ input  { font-family: inherit; }
 /* Hero — scrolls with page content */
 .mdp-hero {
   position: relative;
-  height: clamp(360px, 68vh, 760px);
+  height: clamp(260px, 46vh, 540px);
   flex-shrink: 0;
   overflow: visible;
   will-change: opacity;
