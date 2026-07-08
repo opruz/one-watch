@@ -373,7 +373,7 @@ export default function MovieDetailPage({
                 {pick.watchPlatforms && pick.watchPlatforms.length > 0 && (
                   <div className="mdp-platform-row">
                     {pick.watchPlatforms.map((platform) => (
-                      <button key={platform} type="button" className="mdp-platform-btn">
+                      <button key={platform} type="button" className="mdp-platform-btn" title={platform}>
                         {PLATFORM_LOGOS[platform] && (
                           <img
                             src={PLATFORM_LOGOS[platform]}
@@ -382,7 +382,6 @@ export default function MovieDetailPage({
                             draggable={false}
                           />
                         )}
-                        <span>{platform}</span>
                       </button>
                     ))}
                   </div>
@@ -394,15 +393,20 @@ export default function MovieDetailPage({
               <div className="mdp-reviews">
                 <p className="mdp-section-label">Reviews</p>
                 <div className="mdp-rating-row">
-                  <p className="mdp-review-score">
-                    <strong className="mdp-score-value">{pick.imdb_score}</strong>
-                    <span className="mdp-score-denom">/10</span>
-                  </p>
-                  <button type="button" className="mdp-user-rating-btn" title="Rate this">
-                    <Star size={20} weight="regular" />
-                  </button>
+                  <div className="mdp-score-block">
+                    <p className="mdp-review-score">
+                      <strong className="mdp-score-value">{pick.imdb_score}</strong>
+                      <span className="mdp-score-denom">/10</span>
+                    </p>
+                    <p className="mdp-review-count">Based on {pick.ratingCount ?? "2.4k"} ratings</p>
+                  </div>
+                  <div className="mdp-user-rating-block">
+                    <p className="mdp-user-rating-label">Your rating</p>
+                    <button type="button" className="mdp-user-rating-btn" title="Rate this">
+                      <Star size={32} weight="regular" />
+                    </button>
+                  </div>
                 </div>
-                <p className="mdp-review-count">Based on {pick.ratingCount ?? "2.4k"} ratings</p>
                 <blockquote className="mdp-review-quote">"{pick.why_this}"</blockquote>
               </div>
 

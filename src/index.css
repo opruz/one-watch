@@ -2138,24 +2138,21 @@ input  { font-family: inherit; }
 .mdp-platform-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.48rem 0.9rem;
-  border-radius: 999px;
+  justify-content: center;
+  padding: 0.7rem 1.2rem;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--bg-lift);
-  color: var(--text);
-  font-size: 0.76rem;
-  font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
   transition: background 0.15s;
+  min-width: 72px;
 }
 .mdp-platform-btn:hover { background: var(--bg-high); }
 
 .mdp-platform-logo-img {
-  height: 16px;
+  height: 26px;
   width: auto;
-  max-width: 52px;
+  max-width: 80px;
   object-fit: contain;
 }
 
@@ -2209,8 +2206,14 @@ input  { font-family: inherit; }
 
 .mdp-rating-row {
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
+  align-items: flex-start;
+  gap: 1.6rem;
+}
+
+.mdp-score-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .mdp-review-score {
@@ -2233,10 +2236,24 @@ input  { font-family: inherit; }
   color: rgba(255, 255, 255, 0.38);
 }
 
+.mdp-user-rating-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.mdp-user-rating-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
 .mdp-user-rating-btn {
   background: none;
   border: none;
-  padding: 0.15rem;
+  padding: 0;
   color: rgba(255, 255, 255, 0.28);
   cursor: pointer;
   transition: color 0.15s;
@@ -2247,7 +2264,6 @@ input  { font-family: inherit; }
 .mdp-review-count {
   font-size: 0.68rem;
   color: rgba(255, 255, 255, 0.42);
-  margin-bottom: 0.35rem;
 }
 
 .mdp-review-quote {
@@ -2387,7 +2403,7 @@ input  { font-family: inherit; }
   top: 0;
   left: 0;
   width: 100%;
-  height: 38.04vw; /* 50% of natural aspect ratio */
+  height: 58vw;
   object-fit: fill;
   opacity: 0.7;
   pointer-events: none;
@@ -2401,7 +2417,7 @@ input  { font-family: inherit; }
   top: 0;
   left: 0;
   right: 0;
-  height: 38.04vw;
+  height: 58vw;
   background: linear-gradient(to bottom,
     rgba(9,9,11,0)    0%,
     rgba(9,9,11,0.35) 55%,
@@ -2867,14 +2883,15 @@ input  { font-family: inherit; }
 }
 
 .mdp-platform-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-  transition: background 0.2s var(--ease), border-color 0.2s;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight);
+  transition: background 0.2s var(--ease), border-color 0.2s, box-shadow 0.2s;
 }
 .mdp-platform-btn:hover {
-  background: var(--bg-lift);
-  border-color: var(--border-md);
+  background: var(--glass-strong);
+  border-color: var(--glass-border-strong);
+  box-shadow: var(--glass-highlight), var(--liquid-shadow);
 }
 
 /* MDP back button — glass pill */
