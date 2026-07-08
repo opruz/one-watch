@@ -19,7 +19,7 @@
   --r:         16px;
   --r-sm:      10px;
   --r-xs:      7px;
-  --sidebar-w:      224px;
+  --sidebar-w:      248px;
   --sidebar-icon-w: 64px;
   --topbar-h:       59px;
 
@@ -183,6 +183,65 @@ input  { font-family: inherit; }
   text-transform: uppercase;
   color: var(--muted);
   padding: 0 0.3rem;
+}
+
+.sb-cw-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0 16px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  width: calc(100% - 32px);
+}
+
+.sb-cw-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.sb-cw-play-btn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.15);
+  transition: background 0.18s;
+}
+.sb-cw-card:hover .sb-cw-play-btn { background: rgba(0,0,0,0.32); }
+
+.sb-cw-play-btn::before {
+  content: "";
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.50);
+  border: 1.5px solid rgba(255,255,255,0.55);
+}
+
+.sb-cw-play-btn svg {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  transform: translateX(1px);
+}
+
+.sb-cw-title {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.80);
+  line-height: 1.3;
+  padding: 0 2px;
 }
 
 .mini-card {

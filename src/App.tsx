@@ -43,7 +43,6 @@ const GENRE_LABELS: { id: Genre | null; label: string }[] = [
   { id: "fantasy", label: "Fantasy" },
 ];
 
-const PROGRESS = [0.55, 0.28];
 
 export default function App() {
   const [onboarded, setOnboarded] = useState<boolean | null>(null); // null = loading
@@ -82,7 +81,6 @@ export default function App() {
     const pool = filtered.length > 1 ? filtered : titles;
     return pool.filter((t) => t.id !== featuredTitle.id).slice(0, 2);
   }, [filtered, featuredTitle]);
-  const continueWatching = useMemo(() => titles.slice(6, 8), []);
 
   function handleOnboardingComplete(selected: string[]) {
     localStorage.setItem("ow-platforms", JSON.stringify(selected));
@@ -184,22 +182,14 @@ export default function App() {
 
         <div className="sidebar__watchlist">
           <p className="sidebar__wl-label">Continue Watching</p>
-          {continueWatching.map((item, i) => (
-            <button key={item.id} type="button" className="mini-card" onClick={() => setSelected(item)}>
-              <div className="mini-card__poster" style={{ background: item.posterHue }}>
-                {item.title.charAt(0)}
+          <button type="button" className="sb-cw-card">
+            <div className="sb-cw-thumb" style={{ backgroundImage: "url(/grand-budapest-hotel-thumbnail.jpg)" }}>
+              <div className="sb-cw-play-btn">
+                <Play size={14} weight="fill" />
               </div>
-              <div className="mini-card__info">
-                <p className="mini-card__title">{item.title}</p>
-                <div className="mini-card__progress">
-                  <div className="mini-card__bar">
-                    <div className="mini-card__bar-fill" style={{ width: `${PROGRESS[i] * 100}%` }} />
-                  </div>
-                  <span>{Math.round(PROGRESS[i] * 100)}%</span>
-                </div>
-              </div>
-            </button>
-          ))}
+            </div>
+            <p className="sb-cw-title">Grand Budapest Hotel</p>
+          </button>
         </div>
       </aside>
 
