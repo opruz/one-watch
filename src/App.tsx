@@ -1,19 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   House, Heart, Hourglass, Fire, GearSix, Question, ArrowsClockwise,
-  MagnifyingGlass, Bell, Play, CaretDown, CaretLeft, CaretRight,
-  Crosshair, Compass, SquaresFour, Sparkle,
+  Bell, Play, Crosshair, Compass,
 } from "@phosphor-icons/react";
 import titles from "./data/titles";
-import { ProviderBadge } from "./components/explore/ProviderBadge";
-import { TitleCard } from "./components/explore/TitleCard";
 import { TitleModal } from "./components/explore/TitleModal";
 import Onboarding from "./components/onboarding/Onboarding";
 import FocusMode from "./components/focus/FocusMode";
-import { getProviderStatus } from "./lib/providers";
-import { filterTitles, formatRuntime, pickForMe } from "./lib/rank";
-import type { Filters, Genre, Provider, ProviderStatus, Title, UserProviderAccess } from "./types";
-import { MOODS, PROVIDERS, RUNTIME_OPTIONS } from "./types";
+import type { Genre, Title, UserProviderAccess } from "./types";
 
 type AppMode = "focus" | "explore";
 
@@ -22,41 +16,187 @@ type PhIconComp = React.ComponentType<{
   weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
 }>;
 
-const defaultFilters: Filters = { mood: null, maxRuntime: null, genre: null, query: "" };
-
 const defaultProviderAccess: UserProviderAccess = {
   subscribed: ["Netflix", "Disney+", "Hulu"],
   freeWithoutSubscription: ["Prime", "Apple TV+"],
 };
 
-const GENRE_LABELS: { id: Genre | null; label: string }[] = [
-  { id: null, label: "All" },
-  { id: "action", label: "Action" },
-  { id: "comedy", label: "Comedy" },
-  { id: "thriller", label: "Thriller" },
-  { id: "drama", label: "Drama" },
-  { id: "romance", label: "Romance" },
-  { id: "sci-fi", label: "Sci-Fi" },
-  { id: "horror", label: "Horror" },
-  { id: "animation", label: "Animation" },
-  { id: "documentary", label: "Documentary" },
-  { id: "fantasy", label: "Fantasy" },
+const ALL_ROWS = [
+  { label: "Trending Now", genre: null as Genre | null, items: [...titles].sort((a, b) => b.popularity - a.popularity).slice(0, 10) },
+  { label: "Comedy",       genre: "comedy"    as Genre, items: titles.filter(t => t.genres.includes("comedy")).slice(0, 10) },
+  { label: "Thriller",     genre: "thriller"  as Genre, items: titles.filter(t => t.genres.includes("thriller")).slice(0, 10) },
+  { label: "Drama",        genre: "drama"     as Genre, items: titles.filter(t => t.genres.includes("drama")).slice(0, 10) },
+  { label: "Sci-Fi",       genre: "sci-fi"    as Genre, items: titles.filter(t => t.genres.includes("sci-fi")).slice(0, 10) },
+  { label: "Animation",    genre: "animation" as Genre, items: titles.filter(t => t.genres.includes("animation")).slice(0, 10) },
 ];
 
+const GENRE_CHIPS: { label: string; value: Genre | null }[] = [
+  { label: "All",       value: null },
+  { label: "Comedy",    value: "comedy" },
+  { label: "Thriller",  value: "thriller" },
+  { label: "Drama",     value: "drama" },
+  { label: "Sci-Fi",    value: "sci-fi" },
+  { label: "Animation", value: "animation" },
+  { label: "Action",    value: "action" },
+  { label: "Horror",    value: "horror" },
+  { label: "Romance",   value: "romance" },
+  { label: "Documentary", value: "documentary" },
+];
+
+const CARD_FRAC = 0.40;
+const STEP_FRAC = 0.30;
+const LEFT_FRAC = 0.03;
+
+function ExploreRow({ label, items, onSelect }: {
+  label: string;
+  items: Title[];
+  onSelect: (t: Title) => void;
+}) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [drag, setDrag] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [trackW, setTrackW] = useState(0);
+
+  const pointerStartX = useRef(0);
+  const pointerLastX = useRef(0);
+  const pointerLastT = useRef(0);
+  const vxRef = useRef(0);
+  const dragRef = useRef(0);
+  const isDraggingRef = useRef(false);
+  const didMoveRef = useRef(false);
+  const activeIdxRef = useRef(0);
+  activeIdxRef.current = activeIdx;
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => setTrackW(entries[0].contentRect.width));
+    ro.observe(el);
+    setTrackW(el.getBoundingClientRect().width);
+    return () => ro.disconnect();
+  }, []);
+
+  const step = trackW * STEP_FRAC;
+
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointerStartX.current = e.clientX;
+    pointerLastX.current = e.clientX;
+    pointerLastT.current = Date.now();
+    vxRef.current = 0;
+    dragRef.current = 0;
+    didMoveRef.current = false;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    setDrag(0);
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    if (!isDraggingRef.current) return;
+    const now = Date.now();
+    const dt = now - pointerLastT.current;
+    if (dt > 0) vxRef.current = (e.clientX - pointerLastX.current) / dt;
+    pointerLastX.current = e.clientX;
+    pointerLastT.current = now;
+    dragRef.current = e.clientX - pointerStartX.current;
+    if (Math.abs(dragRef.current) > 6) didMoveRef.current = true;
+    setDrag(dragRef.current);
+  }
+
+  function onPointerUp() {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    const vx = vxRef.current;
+    const d = dragRef.current;
+    let delta = 0;
+    if (vx < -0.4 || d < -step * 0.3) delta = 1;
+    else if (vx > 0.4 || d > step * 0.3) delta = -1;
+    if (delta !== 0) {
+      setActiveIdx(i => Math.max(0, Math.min(items.length - 1, i + delta)));
+    }
+    setDrag(0);
+  }
+
+  const cardW = trackW * CARD_FRAC;
+  const cardH = Math.round(cardW * (9 / 16) + 44);
+
+  return (
+    <div className="explore-row">
+      <p className="explore-row__label">{label}</p>
+      <div
+        className="ex-track"
+        ref={trackRef}
+        style={trackW > 0 ? { height: cardH } : undefined}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        {trackW > 0 && items.map((title, i) => {
+          const offset = i - activeIdx;
+          const abs = Math.abs(offset);
+          const x = LEFT_FRAC * trackW + offset * step + drag;
+          return (
+            <button
+              key={title.id}
+              type="button"
+              className="ex-card"
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: cardW,
+                transform: `translateX(${x}px)`,
+                transformOrigin: "left center",
+                filter: abs > 0 ? `blur(${abs * 3.5}px)` : "none",
+                zIndex: 10 - abs,
+                transition: isDragging ? "none" : "transform 0.46s cubic-bezier(0.4,0,0.2,1), filter 0.46s cubic-bezier(0.4,0,0.2,1)",
+                pointerEvents: abs > 3 ? "none" : "auto",
+              }}
+              onClick={() => {
+                if (didMoveRef.current) return;
+                if (abs === 0) onSelect(title);
+                else setActiveIdx(i);
+              }}
+            >
+              <div
+                className="ex-card__thumb"
+                style={title.thumbnailUrl
+                  ? undefined
+                  : { background: `linear-gradient(160deg, ${title.posterHue} 0%, #080810 100%)` }
+                }
+              >
+                {title.thumbnailUrl
+                  ? <img src={title.thumbnailUrl} alt={title.title} className="ex-card__thumb-img" draggable={false} />
+                  : <span className="ex-card__initial">{title.title.charAt(0)}</span>
+                }
+              </div>
+              <p className="ex-card__title">{title.title}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
-  const [onboarded, setOnboarded] = useState<boolean | null>(null); // null = loading
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
   const [_platforms, setPlatforms] = useState<string[]>([]);
   const [mode, setMode] = useState<AppMode>("focus");
-  const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [picks, setPicks] = useState<ReturnType<typeof pickForMe> | null>(null);
   const [selected, setSelected] = useState<Title | null>(null);
-  const [hasPicked, setHasPicked] = useState(false);
-  const [providerAccess, setProviderAccess] = useState<UserProviderAccess>(defaultProviderAccess);
-  const [showPlatforms, setShowPlatforms] = useState(false);
-  const genreScrollRef = useRef<HTMLDivElement>(null);
+  const [activeGenre, setActiveGenre] = useState<Genre | null>(null);
 
-  // Persist onboarding state
+  const exploreRows = useMemo(() => {
+    if (activeGenre === null) return ALL_ROWS;
+    const filtered = titles.filter(t => t.genres.includes(activeGenre));
+    const row = ALL_ROWS.find(r => r.genre === activeGenre);
+    return [{ label: row?.label ?? activeGenre, genre: activeGenre, items: filtered }];
+  }, [activeGenre]);
+
   useEffect(() => {
     const stored = localStorage.getItem("ow-platforms");
     if (stored) {
@@ -71,16 +211,6 @@ export default function App() {
       setOnboarded(false);
     }
   }, []);
-
-  const filtered = useMemo(() => filterTitles(titles, filters), [filters]);
-  const featuredTitle = useMemo(
-    () => (picks && picks.length > 0 ? picks[0].title : filtered[0] ?? titles[0]),
-    [filtered, picks],
-  );
-  const sideCards = useMemo(() => {
-    const pool = filtered.length > 1 ? filtered : titles;
-    return pool.filter((t) => t.id !== featuredTitle.id).slice(0, 2);
-  }, [filtered, featuredTitle]);
 
   function handleOnboardingComplete(selected: string[]) {
     localStorage.setItem("ow-platforms", JSON.stringify(selected));
@@ -98,46 +228,18 @@ export default function App() {
     setOnboarded(true);
   }
 
-  function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    setPicks(null);
-    setHasPicked(false);
-  }
-
-  function handlePickForMe() {
-    setPicks(pickForMe(titles, filters));
-    setHasPicked(true);
-  }
-
-  function setProviderStatus(provider: Provider, status: ProviderStatus) {
-    setProviderAccess((prev) => {
-      const nextSubscribed = prev.subscribed.filter((p) => p !== provider);
-      const nextFree = prev.freeWithoutSubscription.filter((p) => p !== provider);
-      if (status === "subscribed") nextSubscribed.push(provider);
-      if (status === "free") nextFree.push(provider);
-      return { subscribed: nextSubscribed, freeWithoutSubscription: nextFree };
-    });
-  }
-
-  function scrollGenres(dir: "left" | "right") {
-    genreScrollRef.current?.scrollBy({ left: dir === "right" ? 180 : -180, behavior: "smooth" });
-  }
-
-  // Loading splash
   if (onboarded === null) return <div className="splash" />;
-
-  // Onboarding
   if (!onboarded) return <Onboarding onComplete={handleOnboardingComplete} onBrowse={handleOnboardingBrowse} />;
 
   const navItems: { label: string; Icon: PhIconComp }[] = [
-    { label: "Home", Icon: House },
-    { label: "Favorites", Icon: Heart },
+    { label: "Home",        Icon: House },
+    { label: "Favorites",   Icon: Heart },
     { label: "Coming Soon", Icon: Hourglass },
-    { label: "Trending", Icon: Fire },
+    { label: "Trending",    Icon: Fire },
   ];
   const settingsItems: { label: string; Icon: PhIconComp }[] = [
     { label: "Settings", Icon: GearSix },
-    { label: "Support", Icon: Question },
+    { label: "Support",  Icon: Question },
   ];
 
   return (
@@ -169,10 +271,7 @@ export default function App() {
             <button
               type="button"
               className="side-link"
-              onClick={() => {
-                localStorage.removeItem("ow-platforms");
-                setOnboarded(false);
-              }}
+              onClick={() => { localStorage.removeItem("ow-platforms"); setOnboarded(false); }}
             >
               <span className="side-link__icon"><ArrowsClockwise size={18} weight="bold" /></span>
               <span className="side-link__label">Platforms</span>
@@ -195,264 +294,69 @@ export default function App() {
 
       {/* ── MAIN ── */}
       <main className="main">
-        {/* Topbar */}
         <header className="topbar">
-          {/* Mode toggle pill */}
           <div className="mode-toggle">
-            <button
-              type="button"
-              className={`mode-btn${mode === "focus" ? " mode-btn--active" : ""}`}
-              onClick={() => setMode("focus")}
-            >
+            <button type="button" className={`mode-btn${mode === "focus" ? " mode-btn--active" : ""}`} onClick={() => setMode("focus")}>
               <Crosshair size={15} weight="duotone" /> Focus
             </button>
-            <button
-              type="button"
-              className={`mode-btn${mode === "explore" ? " mode-btn--active" : ""}`}
-              onClick={() => setMode("explore")}
-            >
+            <button type="button" className={`mode-btn${mode === "explore" ? " mode-btn--active" : ""}`} onClick={() => setMode("explore")}>
               <Compass size={15} weight="duotone" /> Explore
             </button>
           </div>
 
-          {/* Search — only in Explore mode */}
-          {mode === "explore" && (
-            <div className="topbar__search-wrap">
-              <span className="topbar__search-icon" aria-hidden="true"><MagnifyingGlass size={16} weight="bold" /></span>
-              <input
-                type="search"
-                className="search"
-                placeholder="Movies, series, shows..."
-                value={filters.query}
-                onChange={(e) => updateFilter("query", e.target.value)}
-              />
-            </div>
-          )}
-
-          {mode === "focus" && <div className="topbar__spacer" />}
+          <div className="topbar__spacer" />
 
           <div className="topbar__right">
-            {mode === "explore" && (
-              <button
-                type="button"
-                className="topbar__icon-btn"
-                title="Platforms"
-                onClick={() => setShowPlatforms((v) => !v)}
-              >
-                <SquaresFour size={18} weight="duotone" />
-              </button>
-            )}
-            <button type="button" className="topbar__icon-btn" title="Notifications"><Bell size={18} weight="duotone" /></button>
-            <div className="topbar__profile">
-              <div className="topbar__avatar">YR</div>
-              <div className="topbar__user">
-                <p>Yuki R.</p>
-                <small>Premium</small>
+            <button type="button" className="topbar__icon-btn" title="Notifications">
+              <Bell size={18} weight="duotone" />
+            </button>
+            <div className="topbar__profile-wrap">
+              <button type="button" className="topbar__avatar-btn">YR</button>
+              <div className="topbar__profile-menu">
+                <button type="button" className="topbar__menu-item">Account</button>
+                <button type="button" className="topbar__menu-item">Settings</button>
+                <button type="button" className="topbar__menu-item">Manage platforms</button>
+                <div className="topbar__menu-divider" />
+                <button type="button" className="topbar__menu-item topbar__menu-item--danger">Sign out</button>
               </div>
-              <span className="topbar__chevron"><CaretDown size={14} weight="bold" /></span>
             </div>
           </div>
         </header>
 
-        {/* ── FOCUS MODE ── */}
         {mode === "focus" && <FocusMode />}
 
-        {/* ── EXPLORE MODE ── */}
         {mode === "explore" && (
-          <div className="main__content">
-
-            {/* Hero */}
-            <section>
-              <div className="hero-row">
-                <div className="hero__featured">
-                  <div
-                    className="hero__featured-bg"
-                    style={{
-                      background: `linear-gradient(135deg, ${featuredTitle.posterHue} 0%, #080810 100%)`,
-                    }}
-                  />
-                  <div className="hero__gradient" />
-                  <div className="hero__featured-content">
-                    <div className="hero__tags">
-                      <span className="hero__tag">{formatRuntime(featuredTitle.runtime)}</span>
-                      {featuredTitle.genres.slice(0, 1).map((g) => (
-                        <span key={g} className="hero__tag" style={{ textTransform: "capitalize" }}>{g}</span>
-                      ))}
-                      <span className="hero__tag">Movie</span>
-                      <span className="hero__tag">{featuredTitle.year}</span>
-                    </div>
-                    <div className="hero__bottom">
-                      <div className="hero__bottom-left">
-                        <button
-                          type="button"
-                          className="hero__play-btn"
-                          onClick={() => setSelected(featuredTitle)}
-                          aria-label="Play trailer"
-                        >
-                          <Play size={18} weight="fill" />
-                        </button>
-                        <div className="hero__bottom-info">
-                          <h2>{featuredTitle.title}</h2>
-                          <small>Play trailer &nbsp;{formatRuntime(featuredTitle.runtime)}</small>
-                        </div>
-                      </div>
-                      <button type="button" className="hero__heart-btn" aria-label="Add to favorites"><Heart size={20} weight="duotone" /></button>
-                    </div>
-                  </div>
-                </div>
-                <div className="hero__side">
-                  {sideCards.map((t) => (
-                    <div
-                      key={t.id}
-                      className="hero__side-card"
-                      role="button"
-                      tabIndex={0}
-                      style={{ background: `linear-gradient(160deg, ${t.posterHue} 0%, #080810 100%)` }}
-                      onClick={() => setSelected(t)}
-                      onKeyDown={(e) => e.key === "Enter" && setSelected(t)}
-                    >
-                      {t.title.charAt(0)}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="hero__dots">
-                <div className="hero__dot hero__dot--active" />
-                <div className="hero__dot" />
-                <div className="hero__dot" />
-              </div>
-            </section>
-
-            {/* Genre chips */}
-            <div className="genres-row">
-              <button type="button" className="genres-scroll-btn" onClick={() => scrollGenres("left")}><CaretLeft size={18} weight="bold" /></button>
-              <div className="genres-row__chips" ref={genreScrollRef}>
-                {GENRE_LABELS.map(({ id, label }) => (
+          <div className="explore-page">
+            <img src="/onewatch-background.png" className="fm-page-bg" alt="" draggable={false} />
+            <div className="explore-inner">
+              <div className="explore-chips">
+                {GENRE_CHIPS.map(({ label, value }) => (
                   <button
                     key={label}
                     type="button"
-                    className={`genre-chip${filters.genre === id ? " genre-chip--active" : ""}`}
-                    onClick={() => updateFilter("genre", id)}
+                    className={`genre-chip${activeGenre === value ? " genre-chip--active" : ""}`}
+                    onClick={() => setActiveGenre(value)}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-              <button type="button" className="genres-scroll-btn" onClick={() => scrollGenres("right")}><CaretRight size={18} weight="bold" /></button>
+
+              {exploreRows.map(({ label, items }) => (
+                <ExploreRow
+                  key={label}
+                  label={label}
+                  items={items}
+                  onSelect={setSelected}
+                />
+              ))}
             </div>
-
-            {/* Filter panel */}
-            <div className="filter-panel">
-              <div className="filter-group">
-                <label className="filter-label">Mood</label>
-                <div className="chips">
-                  {MOODS.map(({ id, label, emoji }) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={`chip${filters.mood === id ? " chip--active" : ""}`}
-                      onClick={() => updateFilter("mood", filters.mood === id ? null : id)}
-                    >
-                      {emoji} {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="filter-group">
-                <label className="filter-label">Runtime</label>
-                <div className="chips">
-                  {RUNTIME_OPTIONS.map(({ id, label }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      className={`chip${filters.maxRuntime === id ? " chip--active" : ""}`}
-                      onClick={() => updateFilter("maxRuntime", id)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <button type="button" className="btn btn--primary btn--pick" onClick={handlePickForMe}>
-                <Sparkle size={15} weight="duotone" /> Pick for me
-              </button>
-            </div>
-
-            {/* Platforms (collapsible) */}
-            {showPlatforms && (
-              <section className="platforms">
-                <div className="section-header">
-                  <h2>Your platforms</h2>
-                  <span className="section-sub">Manage streaming subscriptions</span>
-                </div>
-                <div className="platforms__row">
-                  {PROVIDERS.map((provider) => (
-                    <ProviderBadge key={provider} provider={provider} status={getProviderStatus(provider, providerAccess)} />
-                  ))}
-                </div>
-                <div className="platforms__manager">
-                  {PROVIDERS.map((provider) => {
-                    const status = getProviderStatus(provider, providerAccess);
-                    return (
-                      <div key={provider} className="platforms__manager-row">
-                        <span className="platforms__manager-name">{provider}</span>
-                        <div className="platforms__manager-actions">
-                          {(["subscribed", "free", "unavailable"] as ProviderStatus[]).map((s) => (
-                            <button
-                              key={s}
-                              type="button"
-                              className={`status-btn${status === s ? " status-btn--active" : ""}`}
-                              onClick={() => setProviderStatus(provider, s)}
-                            >
-                              {s.charAt(0).toUpperCase() + s.slice(1)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* Picks */}
-            {hasPicked && (
-              <section className="picks">
-                <div className="section-header">
-                  <h2>{picks && picks.length > 0 ? <><Sparkle size={14} weight="duotone" /> Your Top Picks</> : "No matches"}</h2>
-                  {picks && picks.length > 0 && <span className="section-sub">Tap for details</span>}
-                </div>
-                {picks && picks.length > 0 ? (
-                  <div className="picks__grid">
-                    {picks.map(({ title, reason }) => (
-                      <TitleCard key={title.id} title={title} providerAccess={providerAccess} reason={reason} featured onClick={() => setSelected(title)} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="empty-state">Nothing matched. Try relaxing the filters.</p>
-                )}
-              </section>
-            )}
-
-            {/* Browse */}
-            <section className="browse">
-              <div className="section-header">
-                <h2>Trending Now</h2>
-                <span className="section-sub">{filtered.length} title{filtered.length !== 1 ? "s" : ""}</span>
-              </div>
-              <div className="browse__grid">
-                {filtered.map((title) => (
-                  <TitleCard key={title.id} title={title} providerAccess={providerAccess} onClick={() => setSelected(title)} />
-                ))}
-              </div>
-              {filtered.length === 0 && <p className="empty-state">No titles found. Clear search or adjust filters.</p>}
-            </section>
           </div>
         )}
       </main>
 
       {selected && (
-        <TitleModal title={selected} providerAccess={providerAccess} onClose={() => setSelected(null)} />
+        <TitleModal title={selected} providerAccess={defaultProviderAccess} onClose={() => setSelected(null)} />
       )}
     </div>
   );

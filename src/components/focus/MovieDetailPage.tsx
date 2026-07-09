@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, Bookmark, FilmStrip, Star } from "@phosphor-icons/react";
 import { type FocusPick, PLATFORM_LOGOS } from "../../data/focusData";
 
@@ -82,6 +83,7 @@ export default function MovieDetailPage({
   const useFlip = !!fromRect && !!panelRect;
   const isPhoto = !!pick.thumbnailUrl;
   const cast = pick.cast ?? PLACEHOLDER_CAST;
+
 
   /* ── Entry ── */
   useLayoutEffect(() => {
@@ -294,6 +296,7 @@ export default function MovieDetailPage({
   }, [isClosing, useFlip]);
 
   return (
+    <>
     <div className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}>
 
       {useFlip && (
@@ -321,11 +324,6 @@ export default function MovieDetailPage({
           </div>
         </div>
       )}
-
-      <button type="button" className="mdp-back" onClick={onClose}>
-        <ArrowLeft size={15} weight="bold" />
-        Back
-      </button>
 
       <div className="mdp-scroll" ref={scrollRef}>
         <div className="mdp-hero" ref={heroRef}>
@@ -441,6 +439,16 @@ export default function MovieDetailPage({
           </div>
         </div>
       </div>
+
     </div>
+
+    {createPortal(
+      <button type="button" className="mdp-back" onClick={onClose}>
+        <ArrowLeft size={15} weight="bold" />
+        Back
+      </button>,
+      document.body
+    )}
+    </>
   );
 }

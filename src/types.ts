@@ -39,6 +39,7 @@ export interface Title {
   popularity: number;
   synopsis: string;
   posterHue: string;
+  thumbnailUrl?: string;
 }
 
 export interface Filters {

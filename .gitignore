@@ -4,3 +4,4 @@ screenshots/
 *.tsbuildinfo
 .env
 .env.local
+.vercel
