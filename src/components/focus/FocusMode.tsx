@@ -127,7 +127,7 @@ function GalleryCard({ pick, offset, isActive, isDetailOpen, onClick }: {
   pick: FocusPick; offset: number; isActive: boolean; isDetailOpen?: boolean;
   onClick: (posterRect: SnapRect | null, panelRect: SnapRect | null) => void;
 }) {
-  const posterRef = useRef<HTMLDivElement>(null);
+  const cardRef   = useRef<HTMLDivElement>(null);
   const panelRef  = useRef<HTMLDivElement>(null);
   const abs     = Math.abs(offset);
   const scale   = Math.max(0.78, 1 - abs * 0.1);
@@ -142,12 +142,13 @@ function GalleryCard({ pick, offset, isActive, isDetailOpen, onClick }: {
       onClick={() => {
         if (!isActive) { onClick(null, null); return; }
         onClick(
-          snapRect(posterRef.current?.getBoundingClientRect() ?? null),
+          snapRect(cardRef.current?.getBoundingClientRect() ?? null),
           snapRect(panelRef.current?.getBoundingClientRect() ?? null),
         );
       }}
     >
       <div
+        ref={cardRef}
         className={`fm-gallery-card${isActive ? " fm-gallery-card--active" : ""}`}
         style={{
           transform: `scale(${scale})`,
@@ -155,7 +156,7 @@ function GalleryCard({ pick, offset, isActive, isDetailOpen, onClick }: {
           opacity,
         }}
       >
-        <div className="fm-gallery-poster" ref={posterRef}>
+        <div className="fm-gallery-poster">
           {pick.thumbnailUrl ? (
             <div className="fm-gallery-bg fm-gallery-bg--photo" style={{ backgroundImage: `url(${pick.thumbnailUrl})` }}>
               <div className="fm-poster-grain" />

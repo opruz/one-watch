@@ -22,12 +22,16 @@ const defaultProviderAccess: UserProviderAccess = {
 };
 
 const ALL_ROWS = [
-  { label: "Trending Now", genre: null as Genre | null, items: [...titles].sort((a, b) => b.popularity - a.popularity).slice(0, 10) },
-  { label: "Comedy",       genre: "comedy"    as Genre, items: titles.filter(t => t.genres.includes("comedy")).slice(0, 10) },
-  { label: "Thriller",     genre: "thriller"  as Genre, items: titles.filter(t => t.genres.includes("thriller")).slice(0, 10) },
-  { label: "Drama",        genre: "drama"     as Genre, items: titles.filter(t => t.genres.includes("drama")).slice(0, 10) },
-  { label: "Sci-Fi",       genre: "sci-fi"    as Genre, items: titles.filter(t => t.genres.includes("sci-fi")).slice(0, 10) },
-  { label: "Animation",    genre: "animation" as Genre, items: titles.filter(t => t.genres.includes("animation")).slice(0, 10) },
+  { label: "All Time Favorites", genre: null as Genre | null, items: [...titles].sort((a, b) => b.popularity - a.popularity).slice(0, 8) },
+  { label: "Comedy",       genre: "comedy"    as Genre, items: titles.filter(t => t.genres.includes("comedy")).sort((a, b) => {
+    const order = ["41", "40", "42", "17"]; // Parks, Office, Seinfeld, Superbad
+    const ai = order.indexOf(a.id); const bi = order.indexOf(b.id);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  }) },
+  { label: "Thriller",     genre: "thriller"  as Genre, items: titles.filter(t => t.genres.includes("thriller")) },
+  { label: "Drama",        genre: "drama"     as Genre, items: titles.filter(t => t.genres.includes("drama")) },
+  { label: "Sci-Fi",       genre: "sci-fi"    as Genre, items: titles.filter(t => t.genres.includes("sci-fi")) },
+  { label: "Animation",    genre: "animation" as Genre, items: titles.filter(t => t.genres.includes("animation")) },
 ];
 
 const GENRE_CHIPS: { label: string; value: Genre | null }[] = [
@@ -43,9 +47,10 @@ const GENRE_CHIPS: { label: string; value: Genre | null }[] = [
   { label: "Documentary", value: "documentary" },
 ];
 
-const CARD_FRAC = 0.40;
+const CARD_FRAC = 0.285;
 const STEP_FRAC = 0.30;
-const LEFT_FRAC = 0.03;
+const LEFT_FRAC = 0.02;
+const VISIBLE_COUNT = 3;
 
 function ExploreRow({ label, items, onSelect }: {
   label: string;
@@ -115,7 +120,8 @@ function ExploreRow({ label, items, onSelect }: {
     if (vx < -0.4 || d < -step * 0.3) delta = 1;
     else if (vx > 0.4 || d > step * 0.3) delta = -1;
     if (delta !== 0) {
-      setActiveIdx(i => Math.max(0, Math.min(items.length - 1, i + delta)));
+      const maxIdx = Math.max(0, items.length - VISIBLE_COUNT);
+      setActiveIdx(i => Math.max(0, Math.min(maxIdx, i + delta)));
     }
     setDrag(0);
   }
@@ -137,8 +143,9 @@ function ExploreRow({ label, items, onSelect }: {
       >
         {trackW > 0 && items.map((title, i) => {
           const offset = i - activeIdx;
-          const abs = Math.abs(offset);
           const x = LEFT_FRAC * trackW + offset * step + drag;
+          const isPeek = offset === VISIBLE_COUNT;
+          const isOffscreen = offset < 0 || offset > VISIBLE_COUNT;
           return (
             <button
               key={title.id}
@@ -150,15 +157,14 @@ function ExploreRow({ label, items, onSelect }: {
                 top: 0,
                 width: cardW,
                 transform: `translateX(${x}px)`,
-                transformOrigin: "left center",
-                filter: abs > 0 ? `blur(${abs * 3.5}px)` : "none",
-                zIndex: 10 - abs,
+                filter: isPeek ? "blur(5px)" : "none",
+                zIndex: isPeek ? 1 : isOffscreen ? 0 : 2,
                 transition: isDragging ? "none" : "transform 0.46s cubic-bezier(0.4,0,0.2,1), filter 0.46s cubic-bezier(0.4,0,0.2,1)",
-                pointerEvents: abs > 3 ? "none" : "auto",
+                pointerEvents: isOffscreen ? "none" : "auto",
               }}
               onClick={() => {
                 if (didMoveRef.current) return;
-                if (abs === 0) onSelect(title);
+                if (offset === 0) onSelect(title);
                 else setActiveIdx(i);
               }}
             >
@@ -173,6 +179,18 @@ function ExploreRow({ label, items, onSelect }: {
                   ? <img src={title.thumbnailUrl} alt={title.title} className="ex-card__thumb-img" draggable={false} />
                   : <span className="ex-card__initial">{title.title.charAt(0)}</span>
                 }
+                {title.logoUrl && (
+                  <img
+                    src={title.logoUrl}
+                    alt={title.title}
+                    className="ex-card__logo"
+                    draggable={false}
+                    style={{
+                      maxWidth: `${title.logoSize ?? 40}%`,
+                      bottom: title.logoBottom ?? 10,
+                    }}
+                  />
+                )}
               </div>
               <p className="ex-card__title">{title.title}</p>
             </button>
@@ -325,7 +343,7 @@ export default function App() {
 
         {mode === "focus" && <FocusMode />}
 
-        {mode === "explore" && (
+        {mode === "explore" && (<>
           <div className="explore-page">
             <img src="/onewatch-background.png" className="fm-page-bg" alt="" draggable={false} />
             <div className="explore-inner">
@@ -352,7 +370,8 @@ export default function App() {
               ))}
             </div>
           </div>
-        )}
+
+        </>)}
       </main>
 
       {selected && (

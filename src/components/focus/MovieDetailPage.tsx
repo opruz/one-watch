@@ -23,6 +23,21 @@ interface Props {
 
 const EASE = "cubic-bezier(0.4,0,0.2,1)";
 const DUR  = 520;
+const CARD_RADIUS = "var(--r)";
+const FLY_ACTIVE_BORDER = "rgba(255, 255, 255, 0.30)";
+const FLY_ACTIVE_SHADOW = "var(--glass-highlight), 0 20px 56px rgba(0, 0, 0, 0.48)";
+
+function flyTransitionProps(dur: number) {
+  return [
+    `top ${dur}ms ${EASE}`,
+    `left ${dur}ms ${EASE}`,
+    `width ${dur}ms ${EASE}`,
+    `height ${dur}ms ${EASE}`,
+    `border-radius ${dur}ms ${EASE}`,
+    `border-color ${dur}ms ${EASE}`,
+    `box-shadow ${dur}ms ${EASE}`,
+  ].join(", ");
+}
 
 const PLACEHOLDER_CAST = [
   "Jordan Smith",
@@ -33,9 +48,9 @@ const PLACEHOLDER_CAST = [
 ];
 
 const PLACEHOLDER_COLLECTIONS = [
-  { name: "Late Night Picks", count: 8 },
-  { name: "Must Watch Again", count: 14 },
-  { name: "Shared with Friends", count: 5 },
+  { name: "Late Night Picks",    count: 8,  posters: ["/knives-out-poster.jpg", "/sixth-sense-poster.jpeg", "/baby-driver-poster.jpg"] },
+  { name: "Must Watch Again",    count: 14, posters: ["/eeaao-poster.jpg", "/severance-poster.webp", "/lovely-bones-poster.jpg"] },
+  { name: "Shared with Friends", count: 5,  posters: ["/saltburn-poster.jpg", "/sheep-detectives-poster.jpg", "/knives-out-poster.jpg"] },
 ];
 
 function CardText({ pick, tagLimit }: { pick: FocusPick; tagLimit?: number }) {
@@ -50,7 +65,7 @@ function CardText({ pick, tagLimit }: { pick: FocusPick; tagLimit?: number }) {
       <div className="fm-gallery-tags">
         {tags.map((tag) => <span key={tag} className="fm-tag">{tag}</span>)}
       </div>
-      <p className="fm-gallery-meta">{pick.year} · {pick.runtime} · ★ {pick.imdb_score}</p>
+      <p className="fm-gallery-meta">{pick.year} · {pick.runtime}</p>
       <p className="fm-gallery-desc">{pick.description}</p>
     </>
   );
@@ -102,20 +117,29 @@ export default function MovieDetailPage({
     savedRect.current      = fromRect;
     savedPanelRect.current = fromPanelRect;
 
+    scrollEl.scrollTop = 0;
     scrollEl.querySelectorAll<HTMLElement>(".mdp-deferred").forEach((el) => {
       el.style.transition = "none";
       el.style.opacity    = "0";
     });
-
-    const { width: heroW, height: heroH } = heroEl.getBoundingClientRect();
-    const destRect = contentTextEl.getBoundingClientRect();
+    scrollEl.querySelectorAll<HTMLElement>(".mdp-pill, .mdp-platform-btn").forEach((btn) => {
+      btn.style.transition = "none";
+      btn.style.transform  = "translateY(14px)";
+    });
+    scrollEl.querySelectorAll<HTMLElement>(".mdp-poster, .mdp-aside").forEach((el) => {
+      el.style.transition = "none";
+      el.style.transform  = "translateY(14px)";
+    });
 
     flyEl.style.transition   = "none";
     flyEl.style.top          = `${fromRect.top}px`;
     flyEl.style.left         = `${fromRect.left}px`;
     flyEl.style.width        = `${fromRect.width}px`;
     flyEl.style.height       = `${fromRect.height}px`;
-    flyEl.style.borderRadius = "16px";
+    flyEl.style.borderRadius = CARD_RADIUS;
+    flyEl.style.background   = "transparent";
+    flyEl.style.borderColor  = FLY_ACTIVE_BORDER;
+    flyEl.style.boxShadow    = FLY_ACTIVE_SHADOW;
     flyEl.style.opacity      = "1";
 
     scrimEl.style.transition = "none";
@@ -143,22 +167,20 @@ export default function MovieDetailPage({
     flyTextEl.style.opacity    = "1";
     flyTextEl.style.visibility = "visible";
 
-    const raf = requestAnimationFrame(() => {
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => {
       const textDelay = Math.round(DUR * 0.06);
       const textDur   = DUR - textDelay;
+      const heroTarget = heroEl.getBoundingClientRect();
+      const destTarget = contentTextEl.getBoundingClientRect();
 
-      flyEl.style.transition = [
-        `top ${DUR}ms ${EASE}`,
-        `left ${DUR}ms ${EASE}`,
-        `width ${DUR}ms ${EASE}`,
-        `height ${DUR}ms ${EASE}`,
-        `border-radius ${DUR}ms ${EASE}`,
-      ].join(", ");
-      flyEl.style.top          = "0";
-      flyEl.style.left         = "0";
-      flyEl.style.width        = `${heroW}px`;
-      flyEl.style.height       = `${heroH}px`;
+      flyEl.style.transition = flyTransitionProps(DUR);
+      flyEl.style.top          = `${heroTarget.top}px`;
+      flyEl.style.left         = `${heroTarget.left}px`;
+      flyEl.style.width        = `${heroTarget.width}px`;
+      flyEl.style.height       = `${heroTarget.height}px`;
       flyEl.style.borderRadius = "0";
+      flyEl.style.borderColor  = "transparent";
+      flyEl.style.boxShadow    = "none";
 
       scrimEl.style.transition = `opacity ${Math.round(DUR * 0.72)}ms ${EASE} ${Math.round(DUR * 0.18)}ms`;
       scrimEl.style.opacity    = "0";
@@ -172,9 +194,9 @@ export default function MovieDetailPage({
         `left ${textDur}ms ${EASE} ${textDelay}ms`,
         `width ${textDur}ms ${EASE} ${textDelay}ms`,
       ].join(", ");
-      flyTextEl.style.top   = `${destRect.top}px`;
-      flyTextEl.style.left  = `${destRect.left}px`;
-      flyTextEl.style.width = `${destRect.width}px`;
+      flyTextEl.style.top   = `${destTarget.top}px`;
+      flyTextEl.style.left  = `${destTarget.left}px`;
+      flyTextEl.style.width = `${destTarget.width}px`;
 
       timersRef.current.push(setTimeout(() => {
         if (heroFadeEl) {
@@ -191,8 +213,16 @@ export default function MovieDetailPage({
         contentTextEl.classList.add("mdp-info-text--settled");
 
         scrollEl.querySelectorAll<HTMLElement>(".mdp-deferred").forEach((el, i) => fadeIn(el, i * 40));
+        scrollEl.querySelectorAll<HTMLElement>(".mdp-pill, .mdp-platform-btn").forEach((btn) => {
+          btn.style.transition = `transform 380ms ${EASE} 40ms`;
+          btn.style.transform  = "translateY(0)";
+        });
+        const posterEl = scrollEl.querySelector<HTMLElement>(".mdp-poster");
+        const asideEl  = scrollEl.querySelector<HTMLElement>(".mdp-aside");
+        if (posterEl) { posterEl.style.transition = `transform 400ms ${EASE}`; posterEl.style.transform = "translateY(0)"; }
+        if (asideEl)  { asideEl.style.transition  = `transform 400ms ${EASE} 80ms`; asideEl.style.transform  = "translateY(0)"; }
       }, DUR + 24));
-    });
+    }));
 
     return () => {
       cancelAnimationFrame(raf);
@@ -223,17 +253,20 @@ export default function MovieDetailPage({
 
     contentTextEl.classList.remove("mdp-info-text--settled");
 
+    scrollEl.scrollTop = 0;
     scrollEl.querySelectorAll<HTMLElement>(".mdp-deferred").forEach((el) => {
       el.style.transition = `opacity ${Math.round(dur * 0.15)}ms ease`;
       el.style.opacity    = "0";
     });
 
     flyEl.style.transition   = "none";
-    flyEl.style.top          = "0";
-    flyEl.style.left         = "0";
+    flyEl.style.top          = `${heroRect.top}px`;
+    flyEl.style.left         = `${heroRect.left}px`;
     flyEl.style.width        = `${heroRect.width}px`;
     flyEl.style.height       = `${heroRect.height}px`;
     flyEl.style.borderRadius = "0";
+    flyEl.style.borderColor  = "transparent";
+    flyEl.style.boxShadow    = "none";
     flyEl.style.opacity      = "1";
 
     scrimEl.style.transition = "none";
@@ -261,19 +294,16 @@ export default function MovieDetailPage({
     flyTextEl.style.width       = `${destRect.width}px`;
     flyTextEl.style.opacity     = "1";
 
-    const raf = requestAnimationFrame(() => {
-      flyEl.style.transition = [
-        `top ${dur}ms ${EASE}`,
-        `left ${dur}ms ${EASE}`,
-        `width ${dur}ms ${EASE}`,
-        `height ${dur}ms ${EASE}`,
-        `border-radius ${dur}ms ${EASE}`,
-      ].join(", ");
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => {
+      flyEl.style.transition = flyTransitionProps(dur);
       flyEl.style.top          = `${from.top}px`;
       flyEl.style.left         = `${from.left}px`;
       flyEl.style.width        = `${from.width}px`;
       flyEl.style.height       = `${from.height}px`;
-      flyEl.style.borderRadius = "16px";
+      flyEl.style.borderRadius = CARD_RADIUS;
+      flyEl.style.background   = "transparent";
+      flyEl.style.borderColor  = FLY_ACTIVE_BORDER;
+      flyEl.style.boxShadow    = FLY_ACTIVE_SHADOW;
 
       scrimEl.style.transition = `opacity ${Math.round(dur * 0.55)}ms ${EASE} ${Math.round(dur * 0.2)}ms`;
       scrimEl.style.opacity    = "1";
@@ -290,7 +320,7 @@ export default function MovieDetailPage({
       flyTextEl.style.top   = `${panelFrom.top}px`;
       flyTextEl.style.left  = `${panelFrom.left}px`;
       flyTextEl.style.width = `${panelFrom.width}px`;
-    });
+    }));
 
     return () => cancelAnimationFrame(raf);
   }, [isClosing, useFlip]);
@@ -300,16 +330,17 @@ export default function MovieDetailPage({
     <div className={`mdp${isClosing ? " mdp--closing" : ""}${useFlip ? " mdp--flip" : ""}`}>
 
       {useFlip && (
-        <div
-          className="mdp-fly"
-          ref={flyRef}
-          style={isPhoto
-            ? { backgroundImage: `url(${pick.thumbnailUrl})` }
-            : { background: pick.posterGradient }
-          }
-        >
-          <div className={`mdp-fly-scrim${isPhoto ? " mdp-fly-scrim--photo" : ""}`} ref={scrimRef} />
-          <div className="mdp-fly-hero-fade" ref={detailFadeRef} />
+        <div className="mdp-fly" ref={flyRef}>
+          <div
+            className="mdp-fly-media"
+            style={isPhoto
+              ? { backgroundImage: `url(${pick.thumbnailUrl})` }
+              : { background: pick.posterGradient }
+            }
+          >
+            <div className={`mdp-fly-scrim${isPhoto ? " mdp-fly-scrim--photo" : ""}`} ref={scrimRef} />
+            <div className="mdp-fly-hero-fade" ref={detailFadeRef} />
+          </div>
         </div>
       )}
 
@@ -426,6 +457,11 @@ export default function MovieDetailPage({
               <div className="mdp-collection-list">
                 {PLACEHOLDER_COLLECTIONS.map((col) => (
                   <button key={col.name} type="button" className="mdp-collection-card">
+                    <div className="col-poster-stack">
+                      {col.posters.map((src, pi) => (
+                        <img key={src} src={src} alt="" className={`col-poster col-poster--${pi}`} draggable={false} />
+                      ))}
+                    </div>
                     <span className="mdp-collection-name">{col.name}</span>
                     <span className="mdp-collection-count">{col.count} titles</span>
                   </button>

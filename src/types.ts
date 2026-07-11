@@ -1,4 +1,4 @@
-export type Provider = "Netflix" | "Prime" | "Disney+" | "HBO Max" | "Apple TV+" | "Hulu";
+export type Provider = "Netflix" | "Prime" | "Disney+" | "HBO Max" | "Apple TV+" | "Hulu" | "Peacock";
 
 export type ProviderStatus = "subscribed" | "free" | "unavailable";
 
@@ -40,6 +40,9 @@ export interface Title {
   synopsis: string;
   posterHue: string;
   thumbnailUrl?: string;
+  logoUrl?: string;
+  logoSize?: number;
+  logoBottom?: number;
 }
 
 export interface Filters {
@@ -55,7 +58,7 @@ export interface RankedTitle {
   reason: string;
 }
 
-export const PROVIDERS: Provider[] = ["Netflix", "Prime", "Disney+", "HBO Max", "Apple TV+", "Hulu"];
+export const PROVIDERS: Provider[] = ["Netflix", "Prime", "Disney+", "HBO Max", "Apple TV+", "Hulu", "Peacock"];
 
 export const PROVIDER_COLORS: Record<Provider, string> = {
   Netflix: "#E50914",
@@ -64,6 +67,7 @@ export const PROVIDER_COLORS: Record<Provider, string> = {
   "HBO Max": "#5822B4",
   "Apple TV+": "#555555",
   Hulu: "#1CE783",
+  Peacock: "#000000",
 };
 
 export const PROVIDER_LOGOS: Record<Provider, string> = {
@@ -73,6 +77,7 @@ export const PROVIDER_LOGOS: Record<Provider, string> = {
   "HBO Max": "max",
   "Apple TV+": "tv+",
   Hulu: "hulu",
+  Peacock: "peacock",
 };
 
 export const MOODS: { id: Mood; label: string; emoji: string }[] = [
