@@ -1972,7 +1972,7 @@ input  { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.22s var(--ease), filter 0.22s var(--ease);
+  transition: filter 0.22s var(--ease);
 }
 .ex-card__thumb::after {
   content: "";
@@ -1994,6 +1994,7 @@ input  { font-family: inherit; }
   object-fit: cover;
   object-position: center;
   display: block;
+  transition: transform 0.22s var(--ease);
 }
 
 .ex-card__logo {
@@ -2008,8 +2009,10 @@ input  { font-family: inherit; }
   z-index: 2;
 }
 .ex-card:hover .ex-card__thumb {
-  transform: scale(1.03);
   filter: brightness(1.12);
+}
+.ex-card:hover .ex-card__thumb-img {
+  transform: scale(1.03);
 }
 
 .ex-card__initial {
